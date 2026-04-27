@@ -1,0 +1,6 @@
+node_modules/
+.env
+uploads/
+*.log
+fix_column.js
+fix.js

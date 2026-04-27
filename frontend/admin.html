@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="mr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - बिरदेव जयंती</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Mukta:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Overlay for Mobile -->
+        <div id="sidebar-overlay" class="sidebar-overlay" onclick="adminApp.closeSidebar()"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <button class="close-sidebar-btn" onclick="adminApp.closeSidebar()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fa-solid fa-shield-halved logo-icon"></i>
+                    <h2 class="app-title">Admin Panel</h2>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active" data-view="dashboard"><i class="fa-solid fa-chart-pie"></i> Financial Stats</li>
+                    <li data-view="donations"><i class="fa-solid fa-list-check"></i> Manage Donations</li>
+                    <li data-view="pending"><i class="fa-solid fa-clipboard-check"></i> Pending Approvals</li>
+                    <li data-view="surnames"><i class="fa-solid fa-folder-tree"></i> Manage Surnames</li>
+                    <li data-view="committee"><i class="fa-solid fa-users"></i> Manage Committee</li>
+                    <li data-view="settings"><i class="fa-solid fa-gear"></i> App Settings</li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn btn-danger full-width" onclick="adminApp.logout()">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="mobile-menu-toggle" id="admin-menu-toggle" aria-label="Open Menu">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <h1 class="header-title" id="page-title">Financial Stats</h1>
+                </div>
+                <div class="header-right">
+                    <a href="index.html" class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-globe"></i> <span class="hide-on-tiny">Public Site</span>
+                    </a>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+
+                <!-- View: Dashboard Stats -->
+                <section id="view-dashboard" class="view-section active">
+                    <h2 class="section-title">एकूण हिशोब (Financials)</h2>
+
+                    <div class="dashboard-cards">
+                        <div class="dash-card collection">
+                            <h3>Total Collected</h3>
+                            <h2 id="dash-collected" style="color: var(--primary-dark); font-size: 2rem;">₹ 0</h2>
+                        </div>
+                        <div class="dash-card balance">
+                            <h3>Remaining Balance</h3>
+                            <h2 id="dash-balance" style="color: var(--success-color); font-size: 2rem;">₹ 0</h2>
+                        </div>
+                        <div class="dash-card expenses">
+                            <h3>Total Expenses</h3>
+                            <h2 id="dash-expenses" style="color: var(--danger-color); font-size: 2rem;">₹ 0</h2>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Add Expense</h3>
+                    <div class="add-form" style="background: var(--bg-light); border: 1px solid var(--primary-color);">
+                        <input type="text" id="new-expense-desc" placeholder="Description">
+                        <input type="number" id="new-expense-amount" placeholder="Amount (₹)">
+                        <input type="date" id="new-expense-date">
+                        <button class="btn btn-danger" onclick="adminApp.addExpense()">
+                            <i class="fa-solid fa-plus"></i> Add
+                        </button>
+                    </div>
+
+                    <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Expenses List</h3>
+                    <div class="expenses-list">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expenses-table-body">
+                                <!-- JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- View: Manage Donations -->
+                <section id="view-donations" class="view-section">
+                    <h2 class="section-title">Manage Donations</h2>
+
+                    <div class="add-form">
+                        <select id="admin-donor-surname">
+                            <option value="">Select Surname...</option>
+                        </select>
+                        <input type="text" id="admin-donor-name" placeholder="Donor Name">
+                        <input type="number" id="admin-donor-amount" placeholder="Amount (₹)">
+                        <input type="text" id="admin-donor-event" placeholder="Event" value="बिरदेव जयंती २०२६">
+                        <button class="btn btn-success" onclick="adminApp.addDonationDirectly()">
+                            <i class="fa-solid fa-plus"></i> Add
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 1.5rem;">
+                        <h3>Filter by Surname</h3>
+                        <select id="filter-surname" onchange="adminApp.filterDonations()"
+                            style="padding: 0.6rem; margin-top: 0.5rem; width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius); font-size: 1rem;">
+                            <option value="ALL">All Surnames</option>
+                        </select>
+                    </div>
+
+                    <div id="all-donations-list" style="margin-top: 1.5rem;">
+                        <!-- JS -->
+                    </div>
+                </section>
+
+                <!-- View: Pending Approvals -->
+                <section id="view-pending" class="view-section">
+                    <h2 class="section-title">Pending Approvals</h2>
+                    <p style="margin-bottom: 1rem; color: var(--text-light);">Review pledges from the public site.</p>
+                    <div id="pending-list-container">
+                        <!-- JS -->
+                    </div>
+                </section>
+
+                <!-- View: Manage Surnames -->
+                <section id="view-surnames" class="view-section">
+                    <h2 class="section-title">Manage Surnames</h2>
+                    <div class="add-form">
+                        <input type="text" id="new-surname-input" placeholder="Enter New Surname">
+                        <button class="btn btn-primary" onclick="adminApp.addSurname()">
+                            <i class="fa-solid fa-plus"></i> Add
+                        </button>
+                    </div>
+
+                    <div class="expenses-list">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Surname</th>
+                                    <th style="text-align: right;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-surnames-table">
+                                <!-- JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- View: Manage Committee -->
+                <section id="view-committee" class="view-section">
+                    <h2 class="section-title">Manage Committee</h2>
+                    <div class="add-form">
+                        <input type="text" id="comm-role" placeholder="Role (e.g. अध्यक्ष)">
+                        <input type="text" id="comm-name" placeholder="Full Name">
+                        <input type="file" id="comm-photo" accept="image/*"
+                            style="padding: 0.4rem; border: 1px solid var(--border-color); border-radius: var(--radius); background: white;">
+                        <button class="btn btn-primary" onclick="adminApp.addCommittee()">
+                            <i class="fa-solid fa-plus"></i> Add
+                        </button>
+                    </div>
+
+                    <div class="committee-grid" id="admin-committee-grid">
+                        <!-- JS -->
+                    </div>
+                </section>
+
+                <!-- View: App Settings -->
+                <section id="view-settings" class="view-section">
+                    <h2 class="section-title">App Settings</h2>
+
+                    <div class="admin-card"
+                        style="background: var(--white); padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow);">
+                        <h3 style="margin-bottom: 1rem;"><i class="fa-solid fa-bullhorn"></i> News Ticker Text</h3>
+                        <div class="form-group">
+                            <textarea id="settings-news-ticker" rows="3"
+                                style="width: 100%; padding: 0.7rem; border: 1px solid var(--border-color); border-radius: var(--radius); font-size: 1rem;"></textarea>
+                        </div>
+                        <button class="btn btn-primary" onclick="adminApp.updateNews()">
+                            <i class="fa-solid fa-save"></i> Update Text
+                        </button>
+
+                        <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                        <h3 style="margin-bottom: 1rem;"><i class="fa-solid fa-image"></i> Banner Image</h3>
+                        <div class="form-group">
+                            <input type="file" id="settings-news-image" accept="image/*"
+                                style="width: 100%; padding: 0.6rem; border: 1px solid var(--border-color); border-radius: var(--radius); background: white;">
+                            <img id="current-banner-preview"
+                                style="max-width: 100%; max-height: 200px; margin-top: 1rem; border-radius: var(--radius); display: none;">
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button class="btn btn-success" onclick="adminApp.updateBannerImage()">
+                                <i class="fa-solid fa-upload"></i> Upload
+                            </button>
+                            <button class="btn btn-danger" onclick="adminApp.removeBannerImage()">
+                                <i class="fa-solid fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+
+</html>
