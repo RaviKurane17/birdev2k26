@@ -1,5 +1,5 @@
 const mysql = require('mysql2');
-require('dotenv').config();
+try { require('dotenv').config(); } catch(e) { /* Vercel injects env vars */ }
 
 const dbConfig = {
     host: process.env.DB_HOST,

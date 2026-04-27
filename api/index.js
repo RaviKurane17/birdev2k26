@@ -1,10 +1,6 @@
 // Vercel Serverless Function: Wraps the Express app
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
-
-// Load env vars
-require('dotenv').config({ path: path.join(__dirname, '..', 'backend', '.env') });
 
 const app = express();
 
