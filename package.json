@@ -1,0 +1,9 @@
+{
+  "name": "birdev2k26",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install-backend": "cd backend && npm install",
+    "start": "cd backend && node server.js"
+  }
+}
