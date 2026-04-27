@@ -15,7 +15,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET || 'demo'
 });
 
-// Setup storage (Use Cloudinary if configured, else local fallback)
+// Setup storage (Use Cloudinary if configured, else memory fallback for serverless)
 let storage;
 if(process.env.CLOUDINARY_CLOUD_NAME) {
     storage = new CloudinaryStorage({
@@ -23,11 +23,18 @@ if(process.env.CLOUDINARY_CLOUD_NAME) {
         params: { folder: 'birdev2k26', allowed_formats: ['jpg', 'png', 'jpeg', 'webp'] }
     });
 } else {
-    if (!fs.existsSync('uploads')) fs.mkdirSync('uploads');
-    storage = multer.diskStorage({
-        destination: (req, file, cb) => cb(null, 'uploads/'),
-        filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
-    });
+    // Use /tmp on serverless (Vercel), or local uploads/ for development
+    try {
+        const uploadDir = process.env.VERCEL ? '/tmp/uploads' : 'uploads';
+        if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+        storage = multer.diskStorage({
+            destination: (req, file, cb) => cb(null, uploadDir),
+            filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+        });
+    } catch(e) {
+        // Fallback to memory storage if filesystem is read-only
+        storage = multer.memoryStorage();
+    }
 }
 const upload = multer({ storage: storage });
 
