@@ -198,7 +198,7 @@ const app = {
             const committee = await window.api.getCommittee();
             const html = committee.map(c => `
                 <div class="member-card">
-                    <div class="avatar"><img src="${c.photoUrl || 'https://api.dicebear.com/6.x/avataaars/svg?seed=' + c.name}" alt="${c.role}"></div>
+                    <div class="avatar"><img src="${c.photoUrl || 'https://api.dicebear.com/6.x/avataaars/svg?seed=' + c.name}" alt="${c.role}" onerror="this.onerror=null; this.src='https://api.dicebear.com/6.x/avataaars/svg?seed=${c.name}'"></div>
                     <h4>${c.role}</h4>
                     <p>${c.name}</p>
                 </div>
