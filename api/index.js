@@ -1,4 +1,5 @@
 // Vercel Serverless Function: Wraps the Express app
+try { require('dotenv').config(); } catch(e) {}
 const express = require('express');
 const cors = require('cors');
 

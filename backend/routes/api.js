@@ -9,32 +9,36 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const fs = require('fs');
 
 // Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'demo',
-  api_key: process.env.CLOUDINARY_API_KEY || 'demo',
-  api_secret: process.env.CLOUDINARY_API_SECRET || 'demo'
-});
+const isCloudinaryConfigured = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
 
-// Setup storage (Use Cloudinary if configured, else memory fallback for serverless)
+if (isCloudinaryConfigured) {
+    cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET
+    });
+}
+
+// Setup storage (Use Cloudinary if configured, else disk fallback)
 let storage;
-if(process.env.CLOUDINARY_CLOUD_NAME) {
+if(isCloudinaryConfigured) {
     storage = new CloudinaryStorage({
         cloudinary: cloudinary,
-        params: { folder: 'birdev2k26', allowed_formats: ['jpg', 'png', 'jpeg', 'webp'] }
+        params: { 
+            folder: 'birdev2k26', 
+            allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+            resource_type: 'auto'
+        }
     });
 } else {
     // Use /tmp on serverless (Vercel), or local uploads/ for development
-    try {
-        const uploadDir = process.env.VERCEL ? '/tmp/uploads' : 'uploads';
-        if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-        storage = multer.diskStorage({
-            destination: (req, file, cb) => cb(null, uploadDir),
-            filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
-        });
-    } catch(e) {
-        // Fallback to memory storage if filesystem is read-only
-        storage = multer.memoryStorage();
-    }
+    const uploadDir = process.env.VERCEL ? '/tmp/uploads' : 'uploads';
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    
+    storage = multer.diskStorage({
+        destination: (req, file, cb) => cb(null, uploadDir),
+        filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+    });
 }
 const upload = multer({ storage: storage });
 
@@ -53,9 +57,17 @@ const verifyToken = (req, res, next) => {
 // --- UPLOAD ROUTE ---
 router.post('/upload', verifyToken, upload.single('image'), (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-    // If local storage, we need to construct the URL, otherwise Cloudinary provides the path
-    const url = req.file.path.replace(/\\/g, '/');
-    const finalUrl = process.env.CLOUDINARY_CLOUD_NAME ? url : `http://localhost:${process.env.PORT || 5000}/${url}`;
+    
+    // If it's a full URL (from Cloudinary), return it directly
+    if (req.file.path.startsWith('http')) {
+        return res.json({ url: req.file.path });
+    }
+
+    // Otherwise, construct a local URL (works for development)
+    const relativePath = req.file.path.replace(/\\/g, '/');
+    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT || 5000}`;
+    const finalUrl = `${baseUrl}/${relativePath}`;
+    
     res.json({ url: finalUrl });
 });
 
