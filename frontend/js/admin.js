@@ -175,8 +175,16 @@ const adminApp = {
                             ${d.isPaid ? `<span class="status-badge paid">Paid</span>` : `<span class="status-badge unpaid">Pending</span>`}
                         </div>
                     </div>
+                    ${d.screenshot_url ? `
+                    <div style="margin-top: 1rem; padding: 1rem; background: rgba(0,0,0,0.02); border-radius: 8px;">
+                        <p style="font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--primary-color);"><i class="fa-solid fa-image"></i> Payment Screenshot (Online):</p>
+                        <a href="${d.screenshot_url}" target="_blank">
+                            <img src="${d.screenshot_url}" alt="Payment Screenshot" style="max-width: 100%; max-height: 150px; border-radius: 4px; border: 1px solid #ddd;">
+                        </a>
+                    </div>
+                    ` : ''}
                     <div style="margin-top: 1rem; border-top: 1px dashed #ccc; padding-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        ${!d.isPaid ? `<button class="btn btn-success" style="padding: 0.2rem 0.5rem;" onclick="adminApp.markPaid(${d.id})">Mark Paid</button>` : ''}
+                        ${!d.isPaid ? `<button class="btn btn-success" style="padding: 0.2rem 0.5rem;" onclick="adminApp.markPaid(${d.id}, '${d.screenshot_url ? 'Online' : 'Cash'}')">Mark Paid</button>` : ''}
                         <button class="btn btn-danger" style="padding: 0.2rem 0.5rem;" onclick="adminApp.deleteDonation(${d.id})"><i class="fa-solid fa-trash"></i> Delete</button>
                     </div>
                 </div>
@@ -226,9 +234,18 @@ const adminApp = {
                     <div class="donor-info">
                         <h4>${d.name} <span style="font-size: 0.8rem; color: #718096;">(${d.surnameCategory}) - ₹ ${d.amount}</span></h4>
                         <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.2rem;">Event: ${d.eventName}</p>
+                        ${d.screenshot_url ? `<span class="status-badge paid" style="background: var(--primary-color); margin-top: 0.5rem; display: inline-block;">Online Payment</span>` : ''}
                     </div>
+                    ${d.screenshot_url ? `
+                    <div style="margin-top: 1rem; padding: 1rem; background: rgba(0,0,0,0.02); border-radius: 8px;">
+                        <p style="font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem;"><i class="fa-solid fa-image"></i> Payment Screenshot:</p>
+                        <a href="${d.screenshot_url}" target="_blank">
+                            <img src="${d.screenshot_url}" alt="Screenshot" style="max-width: 100%; max-height: 200px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        </a>
+                    </div>
+                    ` : ''}
                     <div class="admin-actions-cell" style="display:flex; gap:0.5rem; margin-top: 1rem; flex-wrap: wrap;">
-                        <button class="btn btn-success" onclick="adminApp.markPaid(${d.id})">Approve (Mark Paid)</button>
+                        <button class="btn btn-success" onclick="adminApp.markPaid(${d.id}, '${d.screenshot_url ? 'Online' : 'Cash'}')">Approve (Mark Paid)</button>
                         <button class="btn btn-danger" onclick="adminApp.deleteDonation(${d.id})">Delete</button>
                     </div>
                 </div>
@@ -238,8 +255,8 @@ const adminApp = {
         }
     },
 
-    async markPaid(id) {
-        const mode = prompt("Payment Mode (Cash/Online):", "Cash");
+    async markPaid(id, defaultMode = 'Cash') {
+        const mode = prompt("Payment Mode (Cash/Online):", defaultMode);
         if(!mode) return;
         try {
             await window.api.updateDonation(id, {

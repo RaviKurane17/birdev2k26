@@ -103,12 +103,17 @@ router.get('/donations', async (req, res) => {
 // Add a donation (Publicly accessible, creates a pledge)
 router.post('/donations', async (req, res) => {
     try {
-        const { name, amount, surnameCategory, eventName } = req.body;
+        const { name, amount, surnameCategory, eventName, screenshotUrl } = req.body;
         const evt = eventName || 'बिरदेव जयंती 2026';
-        // Default to isPaid = false for public submissions
+        
+        // Auto-add screenshot_url column if it doesn't exist yet
+        try {
+            await db.query("ALTER TABLE donations ADD COLUMN screenshot_url VARCHAR(500) DEFAULT NULL");
+        } catch(e) {} // Ignore if column already exists
+
         const [result] = await db.query(
-            'INSERT INTO donations (name, amount, surnameCategory, isPaid, eventName) VALUES (?, ?, ?, false, ?)',
-            [name, amount, surnameCategory, evt]
+            'INSERT INTO donations (name, amount, surnameCategory, isPaid, eventName, screenshot_url) VALUES (?, ?, ?, false, ?, ?)',
+            [name, amount, surnameCategory, evt, screenshotUrl || null]
         );
         res.json({ id: result.insertId, message: 'Donation pledge added successfully' });
     } catch (err) {

@@ -652,7 +652,8 @@ const app = {
                 name, 
                 amount, 
                 surnameCategory: surname, 
-                eventName: 'बिरदेव जयंती २०२६'
+                eventName: 'बिरदेव जयंती २०२६',
+                screenshotUrl
             });
 
             alert('तुमची देणगी नोंद यशस्वी झाली! Admin verify करेल.');
