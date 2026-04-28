@@ -47,4 +47,13 @@ CREATE TABLE IF NOT EXISTS committee (
     photoUrl VARCHAR(255)
 );
 
+CREATE TABLE IF NOT EXISTS special_donors (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    amount DECIMAL(10, 2) DEFAULT 0,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('newsTicker', 'नवीन अपडेट: बिरदेव जयंती २०२४ ची तयारी सुरू झाली आहे!');
+

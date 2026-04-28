@@ -167,6 +167,27 @@ const api = {
             body: formData
         });
         return this.handleResponse(res);
+    },
+
+    // --- Special Donors (विशेष सहकार्य) ---
+    async getSpecialDonors() {
+        const res = await fetch(`${API_URL}/special-donors`);
+        return this.handleResponse(res);
+    },
+    async addSpecialDonor(data) {
+        const res = await fetch(`${API_URL}/special-donors`, {
+            method: 'POST',
+            headers: this.getHeaders(),
+            body: JSON.stringify(data)
+        });
+        return this.handleResponse(res);
+    },
+    async deleteSpecialDonor(id) {
+        const res = await fetch(`${API_URL}/special-donors/${id}`, {
+            method: 'DELETE',
+            headers: this.getHeaders()
+        });
+        return this.handleResponse(res);
     }
 };
 

@@ -263,4 +263,57 @@ router.put('/settings/:key', verifyToken, async (req, res) => {
     }
 });
 
+// --- SPECIAL DONORS (विशेष सहकार्य) ROUTES ---
+router.get('/special-donors', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT * FROM special_donors ORDER BY created_at DESC');
+        res.json(rows);
+    } catch (err) {
+        // If table doesn't exist yet, return empty array
+        if (err.code === 'ER_NO_SUCH_TABLE') {
+            return res.json([]);
+        }
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.post('/special-donors', verifyToken, async (req, res) => {
+    try {
+        const { name, amount, description } = req.body;
+        const [result] = await db.query(
+            'INSERT INTO special_donors (name, amount, description) VALUES (?, ?, ?)',
+            [name, amount || 0, description || '']
+        );
+        res.json({ id: result.insertId, message: 'Special donor added successfully' });
+    } catch (err) {
+        // Auto-create table if it doesn't exist
+        if (err.code === 'ER_NO_SUCH_TABLE') {
+            await db.query(`CREATE TABLE IF NOT EXISTS special_donors (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                amount DECIMAL(10, 2) DEFAULT 0,
+                description TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )`);
+            // Retry the insert
+            const { name, amount, description } = req.body;
+            const [result] = await db.query(
+                'INSERT INTO special_donors (name, amount, description) VALUES (?, ?, ?)',
+                [name, amount || 0, description || '']
+            );
+            return res.json({ id: result.insertId, message: 'Special donor added successfully' });
+        }
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.delete('/special-donors/:id', verifyToken, async (req, res) => {
+    try {
+        await db.query('DELETE FROM special_donors WHERE id = ?', [req.params.id]);
+        res.json({ message: 'Special donor deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;

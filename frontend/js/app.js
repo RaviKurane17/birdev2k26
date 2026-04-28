@@ -13,7 +13,11 @@ const app = {
         await this.fetchSurnames();
         await this.loadNewsTicker();
         await this.loadCommitteeData();
+        await this.loadScannerImage();
         this.loadHomeData();
+        this.loadPaidDonorsHome();
+        this.loadSpecialDonorsHome();
+        this.renderHomeSurnames();
     },
 
     checkAuth() {
@@ -41,7 +45,11 @@ const app = {
 
                 // Load specific view data
                 if (view === 'dashboard') this.loadDashboardData();
-                if (view === 'home') this.loadHomeData();
+                if (view === 'home') {
+                    this.loadHomeData();
+                    this.loadPaidDonorsHome();
+                    this.loadSpecialDonorsHome();
+                }
                 if (view === 'pending') this.loadPendingData();
                 if (view === 'donate') this.populateDonateSelect();
             });
@@ -135,6 +143,16 @@ const app = {
         ).join('');
     },
 
+    renderHomeSurnames() {
+        const container = document.getElementById('home-surnames-grid');
+        if(!container) return;
+        container.innerHTML = surnamesList.map((s, index) => 
+            `<div class="surname-btn" onclick="app.showView('surnames'); app.openFolder('${s.name}')">
+                ${index + 1}. ${s.name}
+            </div>`
+        ).join('');
+    },
+
     async loadNewsTicker() {
         try {
             const news = await window.api.getSetting('newsTicker');
@@ -155,6 +173,22 @@ const app = {
                 }
             }
         } catch (err) {
+            console.error(err);
+        }
+    },
+
+    async loadScannerImage() {
+        try {
+            const scanner = await window.api.getSetting('scannerImage');
+            const scannerImg = document.getElementById('scanner-qr-image');
+            if(scanner && scanner.value && scannerImg) {
+                scannerImg.src = scanner.value;
+                scannerImg.onerror = function() { 
+                    this.src = 'images/qr.webp';
+                    this.onerror = function() { this.src = 'https://via.placeholder.com/200?text=Scan+to+Pay'; };
+                };
+            }
+        } catch(err) {
             console.error(err);
         }
     },
@@ -198,6 +232,67 @@ const app = {
         }
     },
 
+    // --- PAID DONORS ON HOME PAGE ---
+    async loadPaidDonorsHome() {
+        const container = document.getElementById('home-paid-donors-list');
+        if(!container) return;
+        
+        try {
+            const donations = await window.api.getDonations();
+            const paidDonors = donations.filter(d => d.isPaid);
+            
+            if(paidDonors.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 1rem;">अजून कोणीही देणगी दिलेली नाही.</p>';
+                return;
+            }
+
+            container.innerHTML = paidDonors.map(d => `
+                <div class="paid-donor-item">
+                    <div class="paid-donor-avatar">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <div class="paid-donor-info">
+                        <h4>${d.name}</h4>
+                        <span class="paid-donor-surname">${d.surnameCategory}</span>
+                    </div>
+                    <div class="paid-donor-amount">₹ ${d.amount}</div>
+                </div>
+            `).join('');
+        } catch(err) {
+            console.error('Error loading paid donors:', err);
+        }
+    },
+
+    // --- SPECIAL DONORS ON HOME PAGE (विशेष सहकार्य) ---
+    async loadSpecialDonorsHome() {
+        const container = document.getElementById('home-special-donors-list');
+        if(!container) return;
+        
+        try {
+            const donors = await window.api.getSpecialDonors();
+            
+            if(donors.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 1rem;">अजून विशेष सहकार्य जोडलेले नाही.</p>';
+                return;
+            }
+
+            container.innerHTML = donors.map(d => `
+                <div class="special-donor-card-home">
+                    <div class="special-donor-icon-home">
+                        <i class="fa-solid fa-hand-holding-heart"></i>
+                    </div>
+                    <div class="special-donor-details-home">
+                        <h4>${d.name}</h4>
+                        ${d.amount > 0 ? `<span class="special-donor-amount">₹ ${d.amount}</span>` : ''}
+                        ${d.description ? `<p class="special-donor-desc">${d.description}</p>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        } catch(err) {
+            console.error('Error loading special donors:', err);
+        }
+    },
+
     async openFolder(surname) {
         currentFolder = surname;
         document.getElementById('folder-title').innerText = surname;
@@ -212,7 +307,7 @@ const app = {
 
     async loadFolderDonations(surname) {
         const container = document.getElementById('donors-list-container');
-        container.innerHTML = '<p>Loading...</p>';
+        container.innerHTML = '<div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
         try {
             const donations = await window.api.getDonations();
             const filtered = donations.filter(d => d.surnameCategory === surname);
@@ -221,7 +316,7 @@ const app = {
             filtered.sort((a, b) => b.isPaid - a.isPaid);
 
             if(filtered.length === 0) {
-                container.innerHTML = '<p>कोणतीही माहिती उपलब्ध नाही. (No records found)</p>';
+                container.innerHTML = '<p style="text-align: center; padding: 2rem; color: var(--text-light);">कोणतीही माहिती उपलब्ध नाही. (No records found)</p>';
                 return;
             }
 

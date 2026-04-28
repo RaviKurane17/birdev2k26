@@ -34,7 +34,8 @@
                     <li class="active" data-view="dashboard"><i class="fa-solid fa-chart-pie"></i> Financial Stats</li>
                     <li data-view="donations"><i class="fa-solid fa-list-check"></i> Manage Donations</li>
                     <li data-view="pending"><i class="fa-solid fa-clipboard-check"></i> Pending Approvals</li>
-                    <li data-view="surnames"><i class="fa-solid fa-folder-tree"></i> Manage Surnames</li>
+                    <li data-view="surnames"><i class="fa-solid fa-folder-tree"></i> आडनाव यादी</li>
+                    <li data-view="special"><i class="fa-solid fa-hand-holding-heart"></i> विशेष सहकार्य</li>
                     <li data-view="committee"><i class="fa-solid fa-users"></i> Manage Committee</li>
                     <li data-view="settings"><i class="fa-solid fa-gear"></i> App Settings</li>
                 </ul>
@@ -150,17 +151,22 @@
                     </div>
                 </section>
 
-                <!-- View: Manage Surnames -->
+                <!-- View: Manage Surnames (आडनाव यादी) -->
                 <section id="view-surnames" class="view-section">
-                    <h2 class="section-title">Manage Surnames</h2>
+                    <h2 class="section-title">आडनाव (गट) यादी</h2>
                     <div class="add-form">
-                        <input type="text" id="new-surname-input" placeholder="Enter New Surname">
+                        <input type="text" id="new-surname-input" placeholder="नवीन आडनाव (New Surname)">
                         <button class="btn btn-primary" onclick="adminApp.addSurname()">
                             <i class="fa-solid fa-plus"></i> Add
                         </button>
                     </div>
 
-                    <div class="expenses-list">
+                    <!-- Surnames Grid (same style as user dashboard) -->
+                    <div class="surnames-grid" id="admin-surnames-grid" style="margin-top: 1.5rem;">
+                        <!-- JS populated -->
+                    </div>
+
+                    <div class="expenses-list" style="margin-top: 1.5rem;">
                         <table class="data-table">
                             <thead>
                                 <tr>
@@ -172,6 +178,27 @@
                                 <!-- JS -->
                             </tbody>
                         </table>
+                    </div>
+                </section>
+
+                <!-- View: विशेष सहकार्य (Special Cooperation / Donors) -->
+                <section id="view-special" class="view-section">
+                    <h2 class="section-title">विशेष सहकार्य (Special Cooperation)</h2>
+                    <p style="margin-bottom: 1rem; color: var(--text-light);">
+                        विशेष देणगीदार यांची माहिती जोडा. ही माहिती मुख्य पृष्ठावर दिसेल.
+                    </p>
+
+                    <div class="add-form" style="background: var(--bg-light); border: 1px solid var(--primary-color);">
+                        <input type="text" id="special-donor-name" placeholder="नाव (Donor Name)">
+                        <input type="number" id="special-donor-amount" placeholder="रक्कम (Amount ₹)">
+                        <input type="text" id="special-donor-desc" placeholder="वर्णन (Description - e.g. साउंड सिस्टम)">
+                        <button class="btn btn-success" onclick="adminApp.addSpecialDonor()">
+                            <i class="fa-solid fa-plus"></i> जोडा
+                        </button>
+                    </div>
+
+                    <div id="special-donors-admin-list" style="margin-top: 1.5rem;">
+                        <!-- JS populated -->
                     </div>
                 </section>
 
@@ -197,8 +224,9 @@
                 <section id="view-settings" class="view-section">
                     <h2 class="section-title">App Settings</h2>
 
+                    <!-- News Ticker -->
                     <div class="admin-card"
-                        style="background: var(--white); padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow);">
+                        style="background: var(--white); padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 1.5rem;">
                         <h3 style="margin-bottom: 1rem;"><i class="fa-solid fa-bullhorn"></i> News Ticker Text</h3>
                         <div class="form-group">
                             <textarea id="settings-news-ticker" rows="3"
@@ -207,9 +235,11 @@
                         <button class="btn btn-primary" onclick="adminApp.updateNews()">
                             <i class="fa-solid fa-save"></i> Update Text
                         </button>
+                    </div>
 
-                        <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border-color);">
-
+                    <!-- Banner Image -->
+                    <div class="admin-card"
+                        style="background: var(--white); padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 1.5rem;">
                         <h3 style="margin-bottom: 1rem;"><i class="fa-solid fa-image"></i> Banner Image</h3>
                         <div class="form-group">
                             <input type="file" id="settings-news-image" accept="image/*"
@@ -223,6 +253,29 @@
                             </button>
                             <button class="btn btn-danger" onclick="adminApp.removeBannerImage()">
                                 <i class="fa-solid fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Scanner / QR Code Upload -->
+                    <div class="admin-card"
+                        style="background: var(--white); padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 1.5rem;">
+                        <h3 style="margin-bottom: 1rem;"><i class="fa-solid fa-qrcode"></i> Payment Scanner / QR Code</h3>
+                        <p style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">
+                            Upload a QR code or payment scanner image. This will be displayed on the "देणगी भरा" page for users.
+                        </p>
+                        <div class="form-group">
+                            <input type="file" id="settings-scanner-image" accept="image/*"
+                                style="width: 100%; padding: 0.6rem; border: 1px solid var(--border-color); border-radius: var(--radius); background: white;">
+                            <img id="current-scanner-preview"
+                                style="max-width: 100%; max-height: 250px; margin-top: 1rem; border-radius: var(--radius); display: none; border: 2px dashed var(--primary-color); padding: 0.5rem;">
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button class="btn btn-success" onclick="adminApp.updateScannerImage()">
+                                <i class="fa-solid fa-upload"></i> Upload Scanner
+                            </button>
+                            <button class="btn btn-danger" onclick="adminApp.removeScannerImage()">
+                                <i class="fa-solid fa-trash"></i> Remove Scanner
                             </button>
                         </div>
                     </div>

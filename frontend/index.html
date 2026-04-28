@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>बिरदेव जयंती देणगी व्यवस्थापन</title>
+    <meta name="description" content="बिरदेव जयंती देणगी व्यवस्थापन प्रणाली - Community Donation Management System">
     <!-- Google Fonts for Marathi and English -->
     <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome for Icons -->
@@ -64,7 +65,7 @@
 
             <div class="content-wrapper">
 
-                <!-- View: Home -->
+                <!-- View: Home (मुख्य पृष्ठ) -->
                 <section id="view-home" class="view-section active">
                     <!-- Animated News Ticker -->
                     <div class="news-ticker">
@@ -148,8 +149,32 @@
                         </div>
                     </div>
 
-                    <!-- Committee Section Moved to Home -->
-                    <div class="home-committee-section" style="margin-top: 3rem;">
+                    <!-- देणगी दिलेले (Paid Donors List) on मुख्य पृष्ठ -->
+                    <div class="home-paid-section" style="margin-top: 2.5rem;">
+                        <h2 class="section-title"><i class="fa-solid fa-check-circle" style="color: var(--success-color);"></i> देणगी दिलेले (Paid Donors)</h2>
+                        <div id="home-paid-donors-list" class="paid-donors-grid">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+
+                    <!-- विशेष सहकार्य (Special Cooperation) on मुख्य पृष्ठ -->
+                    <div class="home-special-section" style="margin-top: 2.5rem;">
+                        <h2 class="section-title"><i class="fa-solid fa-hand-holding-heart" style="color: var(--primary-dark);"></i> विशेष सहकार्य</h2>
+                        <div id="home-special-donors-list" class="special-donors-grid">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+
+                    <!-- आडनाव यादी on मुख्य पृष्ठ -->
+                    <div class="home-surnames-section" style="margin-top: 2.5rem;">
+                        <h2 class="section-title"><i class="fa-solid fa-list" style="color: var(--primary-dark);"></i> आडनाव यादी</h2>
+                        <div class="surnames-grid" id="home-surnames-grid">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Committee Section on Home -->
+                    <div class="home-committee-section" style="margin-top: 2.5rem;">
                         <h2 class="section-title">अध्यक्ष मंडळ</h2>
                         <div class="committee-grid" id="home-committee-grid">
                             <!-- Populated via JS -->
@@ -232,7 +257,7 @@
                     </div>
                 </section>
 
-                <!-- View: Committee (Keep for sidebar link if needed, or remove) -->
+                <!-- View: Committee -->
                 <section id="view-committee" class="view-section">
                     <h2 class="section-title">अध्यक्ष मंडळ</h2>
                     <p style="margin-bottom: 2rem;">बिरदेव जयंती उत्सव समितीचे प्रमुख पदाधिकारी खालीलप्रमाणे आहेत.</p>
@@ -245,18 +270,18 @@
                 <section id="view-donate" class="view-section">
                     <h2 class="section-title">देणगी भरा (Donate Now)</h2>
                     <div class="donate-container" style="display: flex; gap: 2rem; flex-wrap: wrap;">
-                        <div class="qr-card" style="flex: 1; min-width: 300px;">
+                        <div class="qr-card" style="flex: 1; min-width: 280px;">
                             <h3>ऑनलाईन देणगी भरण्यासाठी स्कॅन करा</h3>
-                            <div class="qr-placeholder">
-                                <!-- Placeholder for QR code -->
-                                <img src="images/qr.webp" alt="QR Code"
+                            <div class="qr-placeholder" id="scanner-qr-container">
+                                <!-- Scanner image from admin or fallback -->
+                                <img id="scanner-qr-image" src="images/qr.webp" alt="QR Code / Scanner"
                                     onerror="this.src='https://via.placeholder.com/200?text=Scan+to+Pay'">
                             </div>
                             <p>Once paid, please fill out the form to notify the Admin.</p>
                         </div>
 
                         <div class="public-donation-form"
-                            style="flex: 1; min-width: 300px; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            style="flex: 1; min-width: 280px; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                             <h3>देणगीची नोंद करा (Pledge Donation)</h3>
                             <div class="form-group">
                                 <label>तुमचे नाव (Your Name)</label>
@@ -284,8 +309,6 @@
                         </div>
                     </div>
                 </section>
-
-                <!-- Views for Admin are now in admin.html -->
 
                 <!-- View: Admin Login -->
                 <section id="view-admin-login" class="view-section">
@@ -316,10 +339,10 @@
                     <i class="fa-solid fa-phone"></i>
                     <span>संपर्क करा - अधिक माहितीसाठी संपर्क साधा</span>
                     <strong id="secret-admin-trigger" style="cursor: pointer; user-select: none;">खजिनदार - महेश लक्ष्मण
-                        हुक्केरी</strong>
+                        हुक्केरी-9112381835</strong>
                 </div>
                 <div class="copyright">
-                    © 2024 बिरदेव जयंती देणगी व्यवस्थापन | सर्व हक्क राखीव
+                    © 2026 बिरदेव जयंती देणगी व्यवस्थापन | सर्व हक्क राखीव
                 </div>
             </footer>
         </main>
