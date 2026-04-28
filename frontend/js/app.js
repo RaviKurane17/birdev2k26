@@ -576,6 +576,104 @@ const app = {
         } catch(err) {
             alert('Error: ' + err.message);
         }
+    },
+
+    // --- HOME DONATE PANEL ---
+    toggleHomeDonate() {
+        const panel = document.getElementById('home-donate-panel');
+        const btn = document.getElementById('home-donate-btn');
+        if(panel.style.display === 'none' || !panel.style.display) {
+            panel.style.display = 'block';
+            btn.classList.add('active');
+            this.populateHomeDonateSelect();
+            // Load scanner image into home panel
+            this.loadHomeScannerQR();
+            // Scroll to panel
+            setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+        } else {
+            panel.style.display = 'none';
+            btn.classList.remove('active');
+        }
+    },
+
+    populateHomeDonateSelect() {
+        const select = document.getElementById('home-donate-surname');
+        if(!select) return;
+        select.innerHTML = '<option value="">निवडा (Select Surname)</option>' + 
+            surnamesList.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+    },
+
+    async loadHomeScannerQR() {
+        try {
+            const scanner = await window.api.getSetting('scannerImage');
+            const img = document.getElementById('home-scanner-qr');
+            if(scanner && scanner.value && img) {
+                img.src = scanner.value;
+            }
+        } catch(e) { console.error(e); }
+    },
+
+    previewScreenshot(input) {
+        const preview = document.getElementById('screenshot-preview');
+        const area = document.getElementById('screenshot-upload-area');
+        if(input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                area.classList.add('has-file');
+                area.querySelector('span').textContent = input.files[0].name;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    },
+
+    async submitHomeDonation() {
+        const surname = document.getElementById('home-donate-surname').value;
+        const name = document.getElementById('home-donate-name').value;
+        const amount = document.getElementById('home-donate-amount').value;
+        const screenshotInput = document.getElementById('home-donate-screenshot');
+
+        if(!surname || !name || !amount) return alert('कृपया सर्व माहिती भरा (Please fill all fields)');
+
+        try {
+            // Upload screenshot if available
+            let screenshotUrl = '';
+            if(screenshotInput.files.length > 0) {
+                try {
+                    const res = await window.api.uploadImage(screenshotInput.files[0]);
+                    screenshotUrl = res.url;
+                } catch(e) {
+                    console.warn('Screenshot upload failed, continuing without it');
+                }
+            }
+
+            await window.api.addDonation({ 
+                name, 
+                amount, 
+                surnameCategory: surname, 
+                eventName: 'बिरदेव जयंती २०२६'
+            });
+
+            alert('तुमची देणगी नोंद यशस्वी झाली! Admin verify करेल.');
+            
+            // Reset form
+            document.getElementById('home-donate-surname').value = '';
+            document.getElementById('home-donate-name').value = '';
+            document.getElementById('home-donate-amount').value = '';
+            screenshotInput.value = '';
+            document.getElementById('screenshot-preview').style.display = 'none';
+            document.getElementById('screenshot-upload-area').classList.remove('has-file');
+            document.getElementById('screenshot-upload-area').querySelector('span').textContent = 'क्लिक करा किंवा फाइल ड्रॅग करा';
+
+            // Close panel & refresh data
+            document.getElementById('home-donate-panel').style.display = 'none';
+            document.getElementById('home-donate-btn').classList.remove('active');
+            this.loadHomeData();
+            this.loadPaidDonorsHome();
+        } catch(err) {
+            alert('Error: ' + err.message);
+        }
     }
 };
 
