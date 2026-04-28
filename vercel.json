@@ -1,9 +1,6 @@
 {
-  "buildCommand": "",
-  "installCommand": "npm install",
-  "outputDirectory": "frontend",
-  "framework": null,
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" }
+    { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/(.*)", "destination": "/frontend/$1" }
   ]
 }
