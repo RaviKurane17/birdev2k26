@@ -283,7 +283,7 @@ router.put('/settings/:key', verifyToken, async (req, res) => {
 // --- SPECIAL DONORS (विशेष सहकार्य) ROUTES ---
 router.get('/special-donors', async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM special_donors ORDER BY created_at DESC');
+        const [rows] = await db.query('SELECT * FROM special_donors ORDER BY isApproved ASC, created_at DESC');
         res.json(rows);
     } catch (err) {
         // If table doesn't exist yet, return empty array
@@ -297,8 +297,13 @@ router.get('/special-donors', async (req, res) => {
 router.post('/special-donors', verifyToken, async (req, res) => {
     try {
         const { name, amount, description } = req.body;
+        // Auto-add isApproved column if it doesn't exist yet
+        try {
+            await db.query("ALTER TABLE special_donors ADD COLUMN isApproved BOOLEAN DEFAULT FALSE");
+        } catch(e) {} // Ignore if column already exists
+
         const [result] = await db.query(
-            'INSERT INTO special_donors (name, amount, description) VALUES (?, ?, ?)',
+            'INSERT INTO special_donors (name, amount, description, isApproved) VALUES (?, ?, ?, false)',
             [name, amount || 0, description || '']
         );
         res.json({ id: result.insertId, message: 'Special donor added successfully' });
@@ -310,12 +315,13 @@ router.post('/special-donors', verifyToken, async (req, res) => {
                 name VARCHAR(255) NOT NULL,
                 amount DECIMAL(10, 2) DEFAULT 0,
                 description TEXT,
+                isApproved BOOLEAN DEFAULT FALSE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )`);
             // Retry the insert
             const { name, amount, description } = req.body;
             const [result] = await db.query(
-                'INSERT INTO special_donors (name, amount, description) VALUES (?, ?, ?)',
+                'INSERT INTO special_donors (name, amount, description, isApproved) VALUES (?, ?, ?, false)',
                 [name, amount || 0, description || '']
             );
             return res.json({ id: result.insertId, message: 'Special donor added successfully' });
@@ -328,6 +334,16 @@ router.delete('/special-donors/:id', verifyToken, async (req, res) => {
     try {
         await db.query('DELETE FROM special_donors WHERE id = ?', [req.params.id]);
         res.json({ message: 'Special donor deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.put('/special-donors/:id', verifyToken, async (req, res) => {
+    try {
+        const { isApproved } = req.body;
+        await db.query('UPDATE special_donors SET isApproved = ? WHERE id = ?', [isApproved, req.params.id]);
+        res.json({ message: 'Special donor updated successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

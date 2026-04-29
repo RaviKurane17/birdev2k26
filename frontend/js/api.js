@@ -188,6 +188,14 @@ const api = {
             headers: this.getHeaders()
         });
         return this.handleResponse(res);
+    },
+    async updateSpecialDonor(id, data) {
+        const res = await fetch(`${API_URL}/special-donors/${id}`, {
+            method: 'PUT',
+            headers: this.getHeaders(),
+            body: JSON.stringify(data)
+        });
+        return this.handleResponse(res);
     }
 };
 

@@ -269,7 +269,8 @@ const app = {
         if(!container) return;
         
         try {
-            const donors = await window.api.getSpecialDonors();
+            const allDonors = await window.api.getSpecialDonors();
+            const donors = allDonors.filter(d => d.isApproved || d.isApproved === undefined); // assume old records without flag are approved
             
             if(donors.length === 0) {
                 container.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 1rem;">अजून विशेष सहकार्य जोडलेले नाही.</p>';
@@ -585,9 +586,37 @@ const app = {
         if(panel.style.display === 'none' || !panel.style.display) {
             panel.style.display = 'block';
             btn.classList.add('active');
+            
+            const specialPanel = document.getElementById('home-special-donate-panel');
+            if(specialPanel) {
+                specialPanel.style.display = 'none';
+                document.getElementById('home-special-donate-btn').classList.remove('active');
+            }
+
             this.populateHomeDonateSelect();
             // Load scanner image into home panel
             this.loadHomeScannerQR();
+            // Scroll to panel
+            setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+        } else {
+            panel.style.display = 'none';
+            btn.classList.remove('active');
+        }
+    },
+
+    toggleSpecialDonate() {
+        const panel = document.getElementById('home-special-donate-panel');
+        const btn = document.getElementById('home-special-donate-btn');
+        if(panel.style.display === 'none' || !panel.style.display) {
+            panel.style.display = 'block';
+            btn.classList.add('active');
+            
+            const normalPanel = document.getElementById('home-donate-panel');
+            if(normalPanel) {
+                normalPanel.style.display = 'none';
+                document.getElementById('home-donate-btn').classList.remove('active');
+            }
+
             // Scroll to panel
             setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
         } else {
@@ -672,6 +701,34 @@ const app = {
             document.getElementById('home-donate-btn').classList.remove('active');
             this.loadHomeData();
             this.loadPaidDonorsHome();
+        } catch(err) {
+            alert('Error: ' + err.message);
+        }
+    },
+
+    async submitSpecialDonation() {
+        const name = document.getElementById('home-special-name').value;
+        const amount = document.getElementById('home-special-amount').value;
+        const description = document.getElementById('home-special-desc').value;
+
+        if(!name) return alert('कृपया नाव किंवा संस्थेचे नाव भरा (Please enter name/organization)');
+
+        try {
+            await window.api.addSpecialDonor({ 
+                name, 
+                amount: amount || 0, 
+                description: description || '' 
+            });
+
+            alert('तुमची विशेष सहकार्याची नोंद यशस्वी झाली! Admin verify करून मंजूर करेल.');
+            
+            // Reset form
+            document.getElementById('home-special-name').value = '';
+            document.getElementById('home-special-amount').value = '';
+            document.getElementById('home-special-desc').value = '';
+
+            // Close panel
+            this.toggleSpecialDonate();
         } catch(err) {
             alert('Error: ' + err.message);
         }

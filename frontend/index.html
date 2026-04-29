@@ -150,12 +150,43 @@
                     </div>
 
                     <!-- Stylish Donate Button on मुख्य पृष्ठ -->
-                    <div class="home-donate-cta" style="margin-top: 2rem; text-align: center;">
+                    <div class="home-donate-cta" style="margin-top: 2rem; text-align: center; display: flex; flex-direction: column; gap: 1rem; align-items: center;">
                         <button class="donate-cta-btn" id="home-donate-btn" onclick="app.toggleHomeDonate()">
                             <span class="donate-cta-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
                             <span class="donate-cta-text">देणगी भरा</span>
                             <span class="donate-cta-arrow"><i class="fa-solid fa-arrow-right"></i></span>
                         </button>
+                        
+                        <button class="donate-cta-btn special" id="home-special-donate-btn" onclick="app.toggleSpecialDonate()" style="background: linear-gradient(135deg, #f59e0b, #ec4899); box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);">
+                            <span class="donate-cta-icon"><i class="fa-solid fa-handshake-angle"></i></span>
+                            <span class="donate-cta-text">विशेष सहकार्य नोंदवा</span>
+                            <span class="donate-cta-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                        </button>
+                    </div>
+
+                    <!-- Special Donate Panel (Hidden by default) -->
+                    <div class="home-donate-panel" id="home-special-donate-panel" style="display: none; margin-bottom: 2rem;">
+                        <div class="donate-panel-inner" style="justify-content: center;">
+                            <div class="donate-panel-form" style="width: 100%; max-width: 500px;">
+                                <h3><i class="fa-solid fa-handshake-angle"></i> विशेष सहकार्य नोंदवा</h3>
+                                <div class="form-group">
+                                    <label>पूर्ण नाव / संस्था (Name/Organization)</label>
+                                    <input type="text" id="home-special-name" placeholder="तुमचे नाव किंवा संस्थेचे नाव">
+                                </div>
+                                <div class="form-group">
+                                    <label>रक्कम (Amount ₹ - ऐच्छिक)</label>
+                                    <input type="number" id="home-special-amount" placeholder="₹ (वैकल्पिक)">
+                                </div>
+                                <div class="form-group">
+                                    <label>सहकार्याचे स्वरूप (Description)</label>
+                                    <textarea id="home-special-desc" placeholder="उदा. मंडप व्यवस्था, 100 खुर्च्या इ." rows="3" style="width:100%; padding:0.7rem; border-radius:var(--radius); border:1px solid var(--border-color);"></textarea>
+                                </div>
+                                <button class="btn btn-primary full-width donate-submit-btn" style="background: linear-gradient(135deg, #f59e0b, #ec4899); border:none;" onclick="app.submitSpecialDonation()">
+                                    <i class="fa-solid fa-paper-plane"></i> Submit Request
+                                </button>
+                                <p style="margin-top: 0.8rem; font-size: 0.8rem; color: var(--text-light); text-align: center;">Admin तुमचे सहकार्य verify करून मंजूर करेल.</p>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Inline Donate Panel (Hidden by default) -->
@@ -206,18 +237,26 @@
                     </div>
 
                     <!-- देणगी दिलेले (Paid Donors List) on मुख्य पृष्ठ -->
-                    <div class="home-paid-section" style="margin-top: 2.5rem;">
-                        <h2 class="section-title"><i class="fa-solid fa-check-circle" style="color: var(--success-color);"></i> देणगी दिलेले (Paid Donors)</h2>
-                        <div id="home-paid-donors-list" class="paid-donors-grid">
-                            <!-- Populated via JS -->
+                    <div class="home-paid-section" style="margin-top: 2.5rem; text-align: center;">
+                        <button class="btn-animated-expand" onclick="document.getElementById('home-paid-container').classList.toggle('expanded')">
+                            <i class="fa-solid fa-users"></i> सर्व देणगी दिलेले पहा (View Paid Donors)
+                        </button>
+                        <div id="home-paid-container" class="collapsable-container">
+                            <div id="home-paid-donors-list" class="paid-donors-grid">
+                                <!-- Populated via JS -->
+                            </div>
                         </div>
                     </div>
 
                     <!-- विशेष सहकार्य (Special Cooperation) on मुख्य पृष्ठ -->
-                    <div class="home-special-section" style="margin-top: 2.5rem;">
-                        <h2 class="section-title"><i class="fa-solid fa-hand-holding-heart" style="color: var(--primary-dark);"></i> विशेष सहकार्य</h2>
-                        <div id="home-special-donors-list" class="special-donors-grid">
-                            <!-- Populated via JS -->
+                    <div class="home-special-section" style="margin-top: 2.5rem; text-align: center;">
+                        <button class="btn-animated-expand special-btn" onclick="document.getElementById('home-special-container').classList.toggle('expanded')">
+                            <i class="fa-solid fa-hand-holding-heart"></i> विशेष सहकार्य पहा (View Special Cooperation)
+                        </button>
+                        <div id="home-special-container" class="collapsable-container">
+                            <div id="home-special-donors-list" class="special-donors-grid">
+                                <!-- Populated via JS -->
+                            </div>
                         </div>
                     </div>
 

@@ -433,6 +433,50 @@ body {
     margin-top: 0.5rem;
 }
 
+/* ============ ANIMATED EXPAND BUTTONS ============ */
+.btn-animated-expand {
+    background: linear-gradient(135deg, #0ea5e9, #10b981); /* Skyblue to Green */
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+}
+.btn-animated-expand:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+}
+.btn-animated-expand:active {
+    transform: translateY(1px);
+}
+.btn-animated-expand.special-btn {
+    background: linear-gradient(135deg, #f59e0b, #ec4899); /* Orange to Pink */
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+}
+.btn-animated-expand.special-btn:hover {
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+}
+.collapsable-container {
+    display: none;
+    text-align: left;
+}
+.collapsable-container.expanded {
+    display: block;
+    animation: fadeInDown 0.5s ease;
+}
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* ============ PAID DONORS LIST (HOME) ============ */
 .paid-donors-grid {
     display: grid;

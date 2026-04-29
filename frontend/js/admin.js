@@ -342,20 +342,23 @@ const adminApp = {
                 return;
             }
             container.innerHTML = donors.map(d => `
-                <div class="special-donor-card">
+                <div class="special-donor-card ${d.isApproved ? '' : 'unpaid'}" style="${!d.isApproved ? 'border-left: 4px solid var(--danger-color);' : ''}">
                     <div class="special-donor-info">
-                        <div class="special-donor-icon">
+                        <div class="special-donor-icon" style="${!d.isApproved ? 'background: var(--danger-color);' : ''}">
                             <i class="fa-solid fa-hand-holding-heart"></i>
                         </div>
                         <div class="special-donor-details">
-                            <h4>${d.name}</h4>
+                            <h4>${d.name} ${!d.isApproved ? '<span class="status-badge unpaid" style="font-size:0.7rem; margin-left:0.5rem;">Pending</span>' : ''}</h4>
                             ${d.amount > 0 ? `<span class="amount" style="color: var(--success-color); font-weight: 700;">₹ ${d.amount}</span>` : ''}
                             ${d.description ? `<p style="color: var(--text-light); margin-top: 0.3rem; font-size: 0.9rem;">${d.description}</p>` : ''}
                         </div>
                     </div>
-                    <button class="btn btn-danger" style="padding: 0.2rem 0.5rem; align-self: flex-start;" onclick="adminApp.deleteSpecialDonor(${d.id})">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
+                    <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                        ${!d.isApproved ? `<button class="btn btn-success" style="padding: 0.2rem 0.5rem;" onclick="adminApp.approveSpecialDonor(${d.id})"><i class="fa-solid fa-check"></i> Approve</button>` : ''}
+                        <button class="btn btn-danger" style="padding: 0.2rem 0.5rem; align-self: flex-end;" onclick="adminApp.deleteSpecialDonor(${d.id})">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </button>
+                    </div>
                 </div>
             `).join('');
         } catch(err) {
@@ -379,6 +382,16 @@ const adminApp = {
             alert('विशेष सहकार्य यशस्वीरित्या जोडले!');
         } catch(err) {
             alert('Error: ' + err.message);
+        }
+    },
+
+    async approveSpecialDonor(id) {
+        if(!confirm('विशेष सहकार्य मंजूर (Approve) करायचे आहे का?')) return;
+        try {
+            await window.api.updateSpecialDonor(id, { isApproved: true });
+            this.loadSpecialDonorsAdmin();
+        } catch(err) {
+            alert('Error approving: ' + err.message);
         }
     },
 
