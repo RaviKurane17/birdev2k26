@@ -186,8 +186,23 @@ router.get('/stats', async (req, res) => {
         const [donations] = await db.query('SELECT SUM(amount) as totalCollected FROM donations WHERE isPaid = true');
         const [pending] = await db.query('SELECT SUM(amount) as totalPending FROM donations WHERE isPaid = false');
         const [expenses] = await db.query('SELECT SUM(amount) as totalExpenses FROM expenses');
+        
+        // Include Previous Donations (Magil Shillak) in balance
+        let totalPrevious = 0;
+        try {
+            const [previous] = await db.query('SELECT SUM(amount) as totalPrevious FROM previous_donations');
+            totalPrevious = previous[0].totalPrevious || 0;
+        } catch (e) { /* Ignore if table not exists yet */ }
 
-        const totalCollected = donations[0].totalCollected || 0;
+        // Include Approved Special Donors in collection
+        let totalSpecial = 0;
+        try {
+            const [special] = await db.query('SELECT SUM(amount) as totalSpecial FROM special_donors WHERE isApproved = true OR isApproved IS NULL');
+            totalSpecial = special[0].totalSpecial || 0;
+        } catch (e) { /* Ignore if table not exists yet */ }
+
+        const baseCollected = donations[0].totalCollected || 0;
+        const totalCollected = baseCollected + totalSpecial;
         const totalPending = pending[0].totalPending || 0;
         const totalExpenses = expenses[0].totalExpenses || 0;
 
@@ -195,7 +210,7 @@ router.get('/stats', async (req, res) => {
             totalCollected,
             totalPending,
             totalExpenses,
-            remainingBalance: totalCollected - totalExpenses
+            remainingBalance: (totalCollected + totalPrevious) - totalExpenses
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
