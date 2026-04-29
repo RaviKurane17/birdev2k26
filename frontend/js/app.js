@@ -961,13 +961,15 @@ const app = {
         ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, W, H);
 
-        // === SHREE RAM WATERMARK (Center Background) ===
+        // === SHREE RAM WATERMARK (Integrated Background) ===
         if (ramImg) {
             ctx.save();
-            ctx.globalAlpha = 0.15; // Increased visibility but still transparent
-            const ramW = 350;
+            ctx.globalAlpha = 0.15;
+            ctx.globalCompositeOperation = 'multiply'; // Makes white background transparent
+            const ramW = 500;
             const ramH = (ramImg.height / ramImg.width) * ramW;
-            ctx.drawImage(ramImg, (W - ramW) / 2, (H - ramH) / 2 + 50, ramW, ramH);
+            // Positioned to fill the background area
+            ctx.drawImage(ramImg, (W - ramW) / 2, H - ramH - 100, ramW, ramH);
             ctx.restore();
         }
 
@@ -1062,13 +1064,22 @@ const app = {
         const drawInfoRow = (label, value, y, valueColor = '#1a202c', valueFontSize = '17px') => {
             // Label
             ctx.fillStyle = '#8B6914';
-            ctx.font = '13px sans-serif';
+            ctx.font = '14px sans-serif';
             ctx.textAlign = 'left';
             ctx.fillText(label, labelX, y);
-            // Value
+            
+            // Value - Aligned slightly to the right for balance
             ctx.fillStyle = valueColor;
             ctx.font = `bold ${valueFontSize} sans-serif`;
-            ctx.fillText(value, valueX, y);
+            ctx.fillText(value, valueX + 20, y);
+            
+            // Subtle underline for each row
+            ctx.strokeStyle = 'rgba(139, 105, 20, 0.1)';
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(labelX, y + 10);
+            ctx.lineTo(W - labelX, y + 10);
+            ctx.stroke();
         };
 
         drawInfoRow('नाव (Name):', name, startY);
