@@ -900,116 +900,169 @@ const app = {
         }, 300);
     },
 
-    // --- DIGITAL RECEIPT GENERATOR ---
+    // --- PREMIUM DIGITAL RECEIPT GENERATOR ---
     generateReceipt(name, amount, date, surname, paymentMode) {
         const canvas = document.createElement('canvas');
-        canvas.width = 600;
-        canvas.height = 420;
+        const W = 650, H = 520;
+        canvas.width = W;
+        canvas.height = H;
         const ctx = canvas.getContext('2d');
 
-        // Background
-        ctx.fillStyle = '#fffdf5';
-        ctx.fillRect(0, 0, 600, 420);
+        // === BACKGROUND ===
+        // Soft cream base
+        ctx.fillStyle = '#fdfbf4';
+        ctx.fillRect(0, 0, W, H);
 
-        // Top banner
-        const grad = ctx.createLinearGradient(0, 0, 600, 0);
-        grad.addColorStop(0, '#d69e2e');
-        grad.addColorStop(1, '#f6e05e');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, 600, 70);
+        // Subtle pattern dots
+        ctx.fillStyle = 'rgba(214, 158, 46, 0.05)';
+        for (let x = 0; x < W; x += 20) {
+            for (let y = 0; y < H; y += 20) {
+                ctx.beginPath();
+                ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
 
-        // Title text
-        ctx.fillStyle = '#2d3748';
-        ctx.font = 'bold 22px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('बिरदेव जयंती उत्सव समिती', 300, 45);
+        // === GOLD TOP BANNER ===
+        const topGrad = ctx.createLinearGradient(0, 0, W, 0);
+        topGrad.addColorStop(0, '#b7791f');
+        topGrad.addColorStop(0.5, '#d69e2e');
+        topGrad.addColorStop(1, '#ecc94b');
+        ctx.fillStyle = topGrad;
+        ctx.fillRect(0, 0, W, 85);
 
-        // Receipt label
+        // Banner decorative bottom wave
+        ctx.fillStyle = '#fdfbf4';
+        ctx.beginPath();
+        ctx.moveTo(0, 85);
+        ctx.quadraticCurveTo(W / 4, 75, W / 2, 85);
+        ctx.quadraticCurveTo(W * 3 / 4, 95, W, 85);
+        ctx.lineTo(W, 100);
+        ctx.lineTo(0, 100);
+        ctx.fill();
+
+        // Title on banner
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(220, 80, 160, 32);
-        ctx.strokeStyle = '#d69e2e';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(220, 80, 160, 32);
-        ctx.fillStyle = '#d69e2e';
-        ctx.font = 'bold 16px sans-serif';
-        ctx.fillText('देणगी पावती', 300, 102);
+        ctx.font = 'bold 24px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🏛️ बिरदेव जयंती उत्सव समिती', W / 2, 40);
+        ctx.font = '13px sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.fillText('Birdev Jayanti Utsav Samiti', W / 2, 62);
 
-        // Decorative line
+        // === RECEIPT TAG ===
+        const tagW = 180, tagH = 36, tagX = (W - tagW) / 2, tagY = 95;
+        // Tag shadow
+        ctx.fillStyle = 'rgba(214, 158, 46, 0.15)';
+        ctx.beginPath();
+        ctx.roundRect(tagX + 2, tagY + 2, tagW, tagH, 18);
+        ctx.fill();
+        // Tag background
+        const tagGrad = ctx.createLinearGradient(tagX, tagY, tagX + tagW, tagY);
+        tagGrad.addColorStop(0, '#d69e2e');
+        tagGrad.addColorStop(1, '#ecc94b');
+        ctx.fillStyle = tagGrad;
+        ctx.beginPath();
+        ctx.roundRect(tagX, tagY, tagW, tagH, 18);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.fillText('✨ देणगी पावती ✨', W / 2, tagY + 24);
+
+        // === DIVIDER LINE ===
         ctx.strokeStyle = '#e2e8f0';
         ctx.lineWidth = 1;
+        ctx.setLineDash([6, 4]);
         ctx.beginPath();
-        ctx.moveTo(40, 130);
-        ctx.lineTo(560, 130);
+        ctx.moveTo(50, 148);
+        ctx.lineTo(W - 50, 148);
         ctx.stroke();
+        ctx.setLineDash([]);
 
-        // Info rows
-        ctx.textAlign = 'left';
-        ctx.fillStyle = '#718096';
-        ctx.font = '14px sans-serif';
-        const infoY = 160;
-        const lineH = 40;
+        // === INFO SECTION ===
+        const startY = 175;
+        const rowH = 50;
+        const labelX = 60;
+        const valueX = 240;
 
-        // Row 1: Name
-        ctx.fillText('नाव (Name):', 50, infoY);
-        ctx.fillStyle = '#2d3748';
-        ctx.font = 'bold 16px sans-serif';
-        ctx.fillText(name, 200, infoY);
+        const drawRow = (label, value, y, color = '#2d3748') => {
+            // Label
+            ctx.fillStyle = '#a0aec0';
+            ctx.font = '13px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(label, labelX, y);
+            // Value
+            ctx.fillStyle = color;
+            ctx.font = 'bold 17px sans-serif';
+            ctx.fillText(value, valueX, y);
+            // Subtle row separator
+            ctx.strokeStyle = 'rgba(226, 232, 240, 0.6)';
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(labelX, y + 15);
+            ctx.lineTo(W - 60, y + 15);
+            ctx.stroke();
+        };
 
-        // Row 2: Surname
-        ctx.fillStyle = '#718096';
-        ctx.font = '14px sans-serif';
-        ctx.fillText('आडनाव (Surname):', 50, infoY + lineH);
-        ctx.fillStyle = '#2d3748';
-        ctx.font = 'bold 16px sans-serif';
-        ctx.fillText(surname || '-', 200, infoY + lineH);
+        drawRow('नाव (Name)', name, startY);
+        drawRow('आडनाव (Surname)', surname || '-', startY + rowH);
+        drawRow('रक्कम (Amount)', `₹ ${amount}`, startY + rowH * 2, '#16a34a');
+        drawRow('तारीख (Date)', date ? new Date(date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-', startY + rowH * 3);
+        drawRow('पेमेंट पद्धत (Mode)', paymentMode || 'Cash', startY + rowH * 4, paymentMode === 'Online' ? '#3b82f6' : '#d69e2e');
 
-        // Row 3: Amount
-        ctx.fillStyle = '#718096';
-        ctx.font = '14px sans-serif';
-        ctx.fillText('रक्कम (Amount):', 50, infoY + lineH * 2);
-        ctx.fillStyle = '#38a169';
-        ctx.font = 'bold 20px sans-serif';
-        ctx.fillText(`₹ ${amount}`, 200, infoY + lineH * 2);
-
-        // Row 4: Date
-        ctx.fillStyle = '#718096';
-        ctx.font = '14px sans-serif';
-        ctx.fillText('तारीख (Date):', 50, infoY + lineH * 3);
-        ctx.fillStyle = '#2d3748';
-        ctx.font = 'bold 16px sans-serif';
-        ctx.fillText(date ? new Date(date).toLocaleDateString('en-IN') : '-', 200, infoY + lineH * 3);
-
-        // Row 5: Payment Mode
-        ctx.fillStyle = '#718096';
-        ctx.font = '14px sans-serif';
-        ctx.fillText('पेमेंट पद्धत:', 50, infoY + lineH * 4);
-        ctx.fillStyle = '#2d3748';
-        ctx.font = 'bold 16px sans-serif';
-        ctx.fillText(paymentMode, 200, infoY + lineH * 4);
-
-        // Bottom decorative line
-        ctx.strokeStyle = '#e2e8f0';
+        // === STATUS BADGE ===
+        const badgeY = startY + rowH * 5 + 5;
+        ctx.fillStyle = 'rgba(22, 163, 74, 0.1)';
         ctx.beginPath();
-        ctx.moveTo(40, 370);
-        ctx.lineTo(560, 370);
-        ctx.stroke();
+        ctx.roundRect(W / 2 - 80, badgeY, 160, 34, 17);
+        ctx.fill();
+        ctx.fillStyle = '#16a34a';
+        ctx.font = 'bold 15px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('✓ PAYMENT VERIFIED', W / 2, badgeY + 23);
 
-        // Footer
-        ctx.fillStyle = '#a0aec0';
+        // === WATERMARK ===
+        ctx.save();
+        ctx.translate(W / 2, H / 2 + 20);
+        ctx.rotate(-0.3);
+        ctx.fillStyle = 'rgba(214, 158, 46, 0.04)';
+        ctx.font = 'bold 60px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('PAID', 0, 0);
+        ctx.restore();
+
+        // === BOTTOM GOLD BAR ===
+        const btmGrad = ctx.createLinearGradient(0, H - 50, W, H);
+        btmGrad.addColorStop(0, '#b7791f');
+        btmGrad.addColorStop(0.5, '#d69e2e');
+        btmGrad.addColorStop(1, '#ecc94b');
+        ctx.fillStyle = btmGrad;
+        ctx.fillRect(0, H - 40, W, 40);
+
+        // Footer text
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
         ctx.font = '11px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('This is a computer-generated receipt. | बिरदेव जयंती उत्सव समिती', 300, 395);
+        ctx.fillText('Computer Generated Receipt | बिरदेव जयंती उत्सव समिती | birdev2k26.vercel.app', W / 2, H - 15);
 
-        // Bottom gold bar
-        ctx.fillStyle = '#d69e2e';
-        ctx.fillRect(0, 410, 600, 10);
+        // === DECORATIVE CORNER BORDERS ===
+        ctx.strokeStyle = '#d69e2e';
+        ctx.lineWidth = 3;
+        const c = 25;
+        // Top-left
+        ctx.beginPath(); ctx.moveTo(8, c + 8); ctx.lineTo(8, 8); ctx.lineTo(c + 8, 8); ctx.stroke();
+        // Top-right
+        ctx.beginPath(); ctx.moveTo(W - c - 8, 8); ctx.lineTo(W - 8, 8); ctx.lineTo(W - 8, c + 8); ctx.stroke();
+        // Bottom-left
+        ctx.beginPath(); ctx.moveTo(8, H - c - 48); ctx.lineTo(8, H - 48); ctx.lineTo(c + 8, H - 48); ctx.stroke();
+        // Bottom-right
+        ctx.beginPath(); ctx.moveTo(W - c - 8, H - 48); ctx.lineTo(W - 8, H - 48); ctx.lineTo(W - 8, H - c - 48); ctx.stroke();
 
-        // Show receipt in modal
-        this.showReceiptModal(canvas, name);
+        // Show receipt modal
+        this.showReceiptModal(canvas, name, amount);
     },
 
-    showReceiptModal(canvas, name) {
-        // Remove any existing modal
+    showReceiptModal(canvas, name, amount) {
         const existing = document.getElementById('receipt-overlay');
         if (existing) existing.remove();
 
@@ -1025,11 +1078,14 @@ const app = {
                     <i class="fa-solid fa-file-invoice"></i> देणगी पावती (Receipt)
                 </h3>
                 <div class="receipt-canvas-wrapper" id="receipt-canvas-wrapper"></div>
-                <div class="receipt-actions">
-                    <button class="btn btn-success" onclick="app.downloadReceipt()">
+                <div class="receipt-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-top: 1rem;">
+                    <button class="btn btn-success" onclick="app.downloadReceipt()" style="padding: 0.7rem 1.2rem; border-radius: 10px;">
                         <i class="fa-solid fa-download"></i> Download
                     </button>
-                    <button class="btn btn-danger" onclick="document.getElementById('receipt-overlay').remove()">
+                    <button class="btn" onclick="app.shareWhatsApp()" style="padding: 0.7rem 1.2rem; border-radius: 10px; background: #25D366; color: white; border: none; cursor: pointer; font-weight: 600;">
+                        <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                    </button>
+                    <button class="btn btn-danger" onclick="document.getElementById('receipt-overlay').remove()" style="padding: 0.7rem 1.2rem; border-radius: 10px;">
                         <i class="fa-solid fa-xmark"></i> Close
                     </button>
                 </div>
@@ -1039,9 +1095,10 @@ const app = {
         document.body.appendChild(overlay);
         document.getElementById('receipt-canvas-wrapper').appendChild(canvas);
 
-        // Store for download
+        // Store for download / share
         this._receiptCanvas = canvas;
         this._receiptName = name;
+        this._receiptAmount = amount;
     },
 
     downloadReceipt() {
@@ -1050,6 +1107,15 @@ const app = {
         link.download = `Receipt_${this._receiptName || 'Donation'}.png`;
         link.href = this._receiptCanvas.toDataURL('image/png');
         link.click();
+    },
+
+    shareWhatsApp() {
+        const name = this._receiptName || 'Donor';
+        const amount = this._receiptAmount || '';
+        const message = `🏛️ *बिरदेव जयंती उत्सव समिती*\n\n✅ *देणगी पावती (Donation Receipt)*\n\n👤 नाव: *${name}*\n💰 रक्कम: *₹ ${amount}*\n📅 तारीख: ${new Date().toLocaleDateString('en-IN')}\n\n✨ देणगी यशस्वीरित्या जमा झाली!\n🌐 Website: birdev2k26.vercel.app`;
+        
+        const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
     }
 };
 

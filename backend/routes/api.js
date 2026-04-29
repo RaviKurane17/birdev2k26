@@ -152,7 +152,7 @@ router.delete('/donations/:id', verifyToken, async (req, res) => {
     }
 });
 
-// Update a donation status (Admin only)
+// Update a donation (Admin only) - supports status change AND detail edits
 router.put('/donations/:id', verifyToken, async (req, res) => {
     try {
         // Auto-migrate paymentMode from ENUM to VARCHAR if needed
@@ -160,11 +160,23 @@ router.put('/donations/:id', verifyToken, async (req, res) => {
             await db.query("ALTER TABLE donations MODIFY COLUMN paymentMode VARCHAR(50) NULL");
         } catch(e) {} // Ignore if already VARCHAR
 
-        const { isPaid, paymentMode, date } = req.body;
-        await db.query(
-            'UPDATE donations SET isPaid = ?, paymentMode = ?, date = ? WHERE id = ?',
-            [isPaid, paymentMode, date, req.params.id]
-        );
+        const { isPaid, paymentMode, date, name, amount, surnameCategory } = req.body;
+        
+        // Build dynamic update query
+        const updates = [];
+        const values = [];
+        
+        if (isPaid !== undefined) { updates.push('isPaid = ?'); values.push(isPaid); }
+        if (paymentMode !== undefined) { updates.push('paymentMode = ?'); values.push(paymentMode); }
+        if (date !== undefined) { updates.push('date = ?'); values.push(date); }
+        if (name !== undefined) { updates.push('name = ?'); values.push(name); }
+        if (amount !== undefined) { updates.push('amount = ?'); values.push(amount); }
+        if (surnameCategory !== undefined) { updates.push('surnameCategory = ?'); values.push(surnameCategory); }
+        
+        if (updates.length === 0) return res.status(400).json({ error: 'No fields to update' });
+        
+        values.push(req.params.id);
+        await db.query(`UPDATE donations SET ${updates.join(', ')} WHERE id = ?`, values);
         res.json({ message: 'Donation updated successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });

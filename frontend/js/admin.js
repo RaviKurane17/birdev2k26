@@ -192,6 +192,7 @@ const adminApp = {
                             <option value="Online" ${d.screenshot_url ? 'selected' : ''}>Online</option>
                         </select>
                         <button class="btn btn-success" style="padding: 0.2rem 0.5rem;" onclick="adminApp.markPaid(${d.id}, document.getElementById('mode-select-${d.id}').value)">Mark Paid</button>` : ''}
+                        <button class="btn" style="padding: 0.2rem 0.5rem; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white;" onclick="adminApp.openEditModal(${d.id}, '${d.name.replace(/'/g, "\\'")}', ${d.amount}, '${(d.surnameCategory || '').replace(/'/g, "\\'")}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
                         <button class="btn btn-danger" style="padding: 0.2rem 0.5rem;" onclick="adminApp.deleteDonation(${d.id})"><i class="fa-solid fa-trash"></i> Delete</button>
                     </div>
                 </div>
@@ -199,6 +200,66 @@ const adminApp = {
 
         } catch(err) {
             container.innerHTML = '<p style="color: var(--danger-color);">Error loading data.</p>';
+        }
+    },
+
+    // --- EDIT DONATION MODAL ---
+    openEditModal(id, name, amount, surname) {
+        const existing = document.getElementById('edit-donation-overlay');
+        if (existing) existing.remove();
+
+        const overlay = document.createElement('div');
+        overlay.id = 'edit-donation-overlay';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px);';
+        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+
+        overlay.innerHTML = `
+            <div style="background:white;border-radius:16px;padding:2rem;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:slideDown 0.3s ease;">
+                <h3 style="margin-bottom:1.5rem;color:var(--primary-dark);text-align:center;">
+                    <i class="fa-solid fa-pen-to-square"></i> Edit Donation
+                </h3>
+                <div style="display:flex;flex-direction:column;gap:1rem;">
+                    <div>
+                        <label style="font-size:0.85rem;font-weight:600;color:#4a5568;margin-bottom:0.3rem;display:block;">नाव (Name)</label>
+                        <input type="text" id="edit-name" value="${name}" style="width:100%;padding:0.7rem;border:2px solid #e2e8f0;border-radius:8px;font-size:1rem;transition:border 0.3s;" onfocus="this.style.borderColor='#d69e2e'" onblur="this.style.borderColor='#e2e8f0'">
+                    </div>
+                    <div>
+                        <label style="font-size:0.85rem;font-weight:600;color:#4a5568;margin-bottom:0.3rem;display:block;">रक्कम (Amount ₹)</label>
+                        <input type="number" id="edit-amount" value="${amount}" style="width:100%;padding:0.7rem;border:2px solid #e2e8f0;border-radius:8px;font-size:1rem;transition:border 0.3s;" onfocus="this.style.borderColor='#d69e2e'" onblur="this.style.borderColor='#e2e8f0'">
+                    </div>
+                    <div>
+                        <label style="font-size:0.85rem;font-weight:600;color:#4a5568;margin-bottom:0.3rem;display:block;">आडनाव (Surname)</label>
+                        <input type="text" id="edit-surname" value="${surname}" style="width:100%;padding:0.7rem;border:2px solid #e2e8f0;border-radius:8px;font-size:1rem;transition:border 0.3s;" onfocus="this.style.borderColor='#d69e2e'" onblur="this.style.borderColor='#e2e8f0'">
+                    </div>
+                </div>
+                <div style="display:flex;gap:0.8rem;margin-top:1.5rem;">
+                    <button class="btn btn-success" style="flex:1;padding:0.8rem;font-size:1rem;border-radius:10px;" onclick="adminApp.saveEdit(${id})">
+                        <i class="fa-solid fa-check"></i> Save
+                    </button>
+                    <button class="btn btn-danger" style="flex:1;padding:0.8rem;font-size:1rem;border-radius:10px;" onclick="document.getElementById('edit-donation-overlay').remove()">
+                        <i class="fa-solid fa-xmark"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+    },
+
+    async saveEdit(id) {
+        const name = document.getElementById('edit-name').value.trim();
+        const amount = document.getElementById('edit-amount').value;
+        const surnameCategory = document.getElementById('edit-surname').value.trim();
+
+        if (!name || !amount) return alert('Name and amount are required.');
+
+        try {
+            await window.api.updateDonation(id, { name, amount: parseFloat(amount), surnameCategory });
+            document.getElementById('edit-donation-overlay').remove();
+            this.filterDonations();
+            alert('Donation updated successfully!');
+        } catch(err) {
+            alert('Error: ' + err.message);
         }
     },
 
