@@ -72,6 +72,19 @@
                 <section id="view-dashboard" class="view-section active">
                     <h2 class="section-title">एकूण हिशोब (Financials)</h2>
 
+                    <div class="export-bar">
+                        <span class="export-title"><i class="fa-solid fa-file-export"></i> Export Reports:</span>
+                        <button class="btn-export csv" onclick="adminApp.exportDonationsCSV()">
+                            <i class="fa-solid fa-file-csv"></i> Donations CSV
+                        </button>
+                        <button class="btn-export csv" onclick="adminApp.exportExpensesCSV()">
+                            <i class="fa-solid fa-file-csv"></i> Expenses CSV
+                        </button>
+                        <button class="btn-export print" onclick="adminApp.printFullReport()">
+                            <i class="fa-solid fa-print"></i> Print Report
+                        </button>
+                    </div>
+
                     <div class="dashboard-cards">
                         <div class="dash-card collection">
                             <h3>Total Collected</h3>

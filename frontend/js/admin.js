@@ -672,6 +672,139 @@ const adminApp = {
         } catch(err) {
             alert(err.message);
         }
+    },
+
+    // --- EXPORT: CSV DOWNLOAD ---
+    _downloadCSV(filename, csvContent) {
+        const BOM = '\uFEFF'; // UTF-8 BOM for Excel compatibility
+        const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    },
+
+    async exportDonationsCSV() {
+        try {
+            const donations = await window.api.getDonations();
+            const stats = await window.api.getStats();
+
+            let csv = 'Sr No,Name,Surname,Amount (₹),Status,Payment Mode,Date,Event\n';
+            donations.forEach((d, i) => {
+                csv += `${i + 1},"${d.name}","${d.surnameCategory}",${d.amount},${d.isPaid ? 'Paid' : 'Pending'},"${d.paymentMode || (d.isPaid ? 'Cash' : 'N/A')}","${d.date ? new Date(d.date).toLocaleDateString() : '-'}","${d.eventName || ''}"\n`;
+            });
+
+            csv += `\n\nTotal Collected,₹ ${stats.totalCollected}\n`;
+            csv += `Total Pending,₹ ${stats.totalPending}\n`;
+
+            this._downloadCSV('Birdev_Donations_Report.csv', csv);
+        } catch (err) {
+            alert('Error exporting: ' + err.message);
+        }
+    },
+
+    async exportExpensesCSV() {
+        try {
+            const expenses = await window.api.getExpenses();
+            const stats = await window.api.getStats();
+
+            let csv = 'Sr No,Date,Description,Amount (₹)\n';
+            expenses.forEach((e, i) => {
+                csv += `${i + 1},"${new Date(e.date).toLocaleDateString()}","${e.description}",${e.amount}\n`;
+            });
+
+            csv += `\n\nTotal Expenses,₹ ${stats.totalExpenses}\n`;
+
+            this._downloadCSV('Birdev_Expenses_Report.csv', csv);
+        } catch (err) {
+            alert('Error exporting: ' + err.message);
+        }
+    },
+
+    async printFullReport() {
+        try {
+            const stats = await window.api.getStats();
+            const donations = await window.api.getDonations();
+            const expenses = await window.api.getExpenses();
+
+            let previousTotal = 0;
+            try {
+                const previous = await window.api.getPreviousDonations();
+                previousTotal = previous.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+            } catch(e) {}
+
+            const paidDonations = donations.filter(d => d.isPaid);
+            const pendingDonations = donations.filter(d => !d.isPaid);
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>बिरदेव जयंती - Financial Report</title>
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body { font-family: 'Segoe UI', sans-serif; padding: 2rem; color: #2d3748; font-size: 13px; }
+                        h1 { text-align: center; color: #d69e2e; margin-bottom: 0.3rem; font-size: 1.4rem; }
+                        .subtitle { text-align: center; color: #718096; margin-bottom: 1.5rem; font-size: 0.85rem; }
+                        .summary-grid { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+                        .summary-card { flex: 1; min-width: 120px; text-align: center; padding: 0.8rem; border: 2px solid #e2e8f0; border-radius: 8px; }
+                        .summary-card h3 { font-size: 0.75rem; color: #718096; margin-bottom: 0.3rem; }
+                        .summary-card h2 { font-size: 1.2rem; }
+                        .green { color: #38a169; }
+                        .red { color: #e53e3e; }
+                        .gold { color: #d69e2e; }
+                        .purple { color: #6b46c1; }
+                        h2.section { margin: 1.5rem 0 0.5rem; border-bottom: 2px solid #f6e05e; padding-bottom: 0.3rem; font-size: 1rem; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; font-size: 0.8rem; }
+                        th, td { padding: 0.4rem 0.6rem; border: 1px solid #e2e8f0; text-align: left; }
+                        th { background: #fefcbf; font-weight: 600; }
+                        .paid { color: #38a169; font-weight: 600; }
+                        .pending { color: #e53e3e; font-weight: 600; }
+                        .footer { margin-top: 2rem; text-align: center; color: #a0aec0; font-size: 0.75rem; border-top: 1px solid #e2e8f0; padding-top: 0.8rem; }
+                        @media print { body { padding: 1rem; } }
+                    </style>
+                </head>
+                <body>
+                    <h1>🏛️ बिरदेव जयंती उत्सव समिती</h1>
+                    <p class="subtitle">Financial Report — Generated on ${new Date().toLocaleDateString('en-IN')} at ${new Date().toLocaleTimeString('en-IN')}</p>
+
+                    <div class="summary-grid">
+                        <div class="summary-card"><h3>Total Collected</h3><h2 class="gold">₹ ${stats.totalCollected}</h2></div>
+                        <div class="summary-card"><h3>Total Expenses</h3><h2 class="red">₹ ${stats.totalExpenses}</h2></div>
+                        <div class="summary-card"><h3>Remaining Balance</h3><h2 class="green">₹ ${stats.remainingBalance}</h2></div>
+                        <div class="summary-card"><h3>Previous Balance</h3><h2 class="purple">₹ ${previousTotal}</h2></div>
+                    </div>
+
+                    <h2 class="section">✅ Paid Donations (${paidDonations.length})</h2>
+                    <table>
+                        <tr><th>Sr</th><th>Name</th><th>Surname</th><th>Amount</th><th>Mode</th><th>Date</th></tr>
+                        ${paidDonations.map((d, i) => `<tr><td>${i + 1}</td><td>${d.name}</td><td>${d.surnameCategory}</td><td>₹ ${d.amount}</td><td>${d.paymentMode || 'Cash'}</td><td>${d.date ? new Date(d.date).toLocaleDateString() : '-'}</td></tr>`).join('')}
+                    </table>
+
+                    <h2 class="section">⏳ Pending Donations (${pendingDonations.length})</h2>
+                    <table>
+                        <tr><th>Sr</th><th>Name</th><th>Surname</th><th>Amount</th></tr>
+                        ${pendingDonations.map((d, i) => `<tr><td>${i + 1}</td><td>${d.name}</td><td>${d.surnameCategory}</td><td>₹ ${d.amount}</td></tr>`).join('')}
+                    </table>
+
+                    <h2 class="section">💸 Expenses (${expenses.length})</h2>
+                    <table>
+                        <tr><th>Sr</th><th>Date</th><th>Description</th><th>Amount</th></tr>
+                        ${expenses.map((e, i) => `<tr><td>${i + 1}</td><td>${new Date(e.date).toLocaleDateString()}</td><td>${e.description}</td><td>₹ ${e.amount}</td></tr>`).join('')}
+                    </table>
+
+                    <div class="footer">
+                        <p>This is an auto-generated report by बिरदेव जयंती उत्सव समिती Financial System.</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            setTimeout(() => printWindow.print(), 500);
+        } catch (err) {
+            alert('Error generating report: ' + err.message);
+        }
     }
 };
 

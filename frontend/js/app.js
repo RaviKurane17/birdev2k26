@@ -7,6 +7,15 @@ const app = {
         this.checkAuth();
         this.setupEventListeners();
         await this.loadInitialData();
+
+        // Close search dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('search-results-dropdown');
+            const searchContainer = document.querySelector('.search-container');
+            if (dropdown && searchContainer && !searchContainer.contains(e.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
     },
 
     async loadInitialData() {
@@ -346,9 +355,10 @@ const app = {
                             <h4>${d.name}</h4>
                             <span class="amount">₹ ${d.amount}</span>
                         </div>
-                        <div class="donor-status">
+                        <div class="donor-status" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                             ${d.isPaid 
-                                ? `<div class="status-badge paid">Paid - ${new Date(d.date).toLocaleDateString()}</div>`
+                                ? `<div class="status-badge paid">Paid - ${new Date(d.date).toLocaleDateString()}</div>
+                                   <button class="btn-receipt" onclick="event.stopPropagation(); app.generateReceipt('${d.name.replace(/'/g, "\\'")}', ${d.amount}, '${d.date}', '${(d.surnameCategory || '').replace(/'/g, "\\'")}', '${(d.paymentMode || 'Cash').replace(/'/g, "\\'")}')" title="Download Receipt"><i class="fa-solid fa-file-invoice"></i> पावती</button>`
                                 : `<div class="status-badge unpaid">Not Paid</div>`
                             }
                         </div>
@@ -840,6 +850,203 @@ const app = {
                 alert('Failed to copy UPI ID.');
             }
         });
+    },
+
+    // --- PUBLIC SEARCH BAR ---
+    _searchDebounce: null,
+    searchDonor(query) {
+        clearTimeout(this._searchDebounce);
+        const dropdown = document.getElementById('search-results-dropdown');
+
+        if (!query || query.trim().length < 2) {
+            dropdown.classList.remove('active');
+            return;
+        }
+
+        this._searchDebounce = setTimeout(async () => {
+            try {
+                const donations = await window.api.getDonations();
+                const q = query.toLowerCase().trim();
+                const results = donations.filter(d =>
+                    d.name.toLowerCase().includes(q) ||
+                    (d.surnameCategory && d.surnameCategory.toLowerCase().includes(q))
+                );
+
+                if (results.length === 0) {
+                    dropdown.innerHTML = '<div class="search-no-results"><i class="fa-regular fa-face-frown"></i> कोणताही रेकॉर्ड सापडला नाही</div>';
+                } else {
+                    dropdown.innerHTML = results.map(d => `
+                        <div class="search-result-item">
+                            <div class="result-info">
+                                <h4>${d.name}</h4>
+                                <span>${d.surnameCategory} · ₹ ${d.amount}</span>
+                            </div>
+                            <div class="result-status">
+                                ${d.isPaid
+                                    ? `<span class="status-badge paid">Paid ✓</span>`
+                                    : `<span class="status-badge unpaid">Pending</span>`
+                                }
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                dropdown.classList.add('active');
+            } catch (err) {
+                console.error(err);
+            }
+        }, 300);
+    },
+
+    // --- DIGITAL RECEIPT GENERATOR ---
+    generateReceipt(name, amount, date, surname, paymentMode) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 600;
+        canvas.height = 420;
+        const ctx = canvas.getContext('2d');
+
+        // Background
+        ctx.fillStyle = '#fffdf5';
+        ctx.fillRect(0, 0, 600, 420);
+
+        // Top banner
+        const grad = ctx.createLinearGradient(0, 0, 600, 0);
+        grad.addColorStop(0, '#d69e2e');
+        grad.addColorStop(1, '#f6e05e');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 600, 70);
+
+        // Title text
+        ctx.fillStyle = '#2d3748';
+        ctx.font = 'bold 22px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('बिरदेव जयंती उत्सव समिती', 300, 45);
+
+        // Receipt label
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(220, 80, 160, 32);
+        ctx.strokeStyle = '#d69e2e';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(220, 80, 160, 32);
+        ctx.fillStyle = '#d69e2e';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.fillText('देणगी पावती', 300, 102);
+
+        // Decorative line
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(40, 130);
+        ctx.lineTo(560, 130);
+        ctx.stroke();
+
+        // Info rows
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#718096';
+        ctx.font = '14px sans-serif';
+        const infoY = 160;
+        const lineH = 40;
+
+        // Row 1: Name
+        ctx.fillText('नाव (Name):', 50, infoY);
+        ctx.fillStyle = '#2d3748';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.fillText(name, 200, infoY);
+
+        // Row 2: Surname
+        ctx.fillStyle = '#718096';
+        ctx.font = '14px sans-serif';
+        ctx.fillText('आडनाव (Surname):', 50, infoY + lineH);
+        ctx.fillStyle = '#2d3748';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.fillText(surname || '-', 200, infoY + lineH);
+
+        // Row 3: Amount
+        ctx.fillStyle = '#718096';
+        ctx.font = '14px sans-serif';
+        ctx.fillText('रक्कम (Amount):', 50, infoY + lineH * 2);
+        ctx.fillStyle = '#38a169';
+        ctx.font = 'bold 20px sans-serif';
+        ctx.fillText(`₹ ${amount}`, 200, infoY + lineH * 2);
+
+        // Row 4: Date
+        ctx.fillStyle = '#718096';
+        ctx.font = '14px sans-serif';
+        ctx.fillText('तारीख (Date):', 50, infoY + lineH * 3);
+        ctx.fillStyle = '#2d3748';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.fillText(date ? new Date(date).toLocaleDateString('en-IN') : '-', 200, infoY + lineH * 3);
+
+        // Row 5: Payment Mode
+        ctx.fillStyle = '#718096';
+        ctx.font = '14px sans-serif';
+        ctx.fillText('पेमेंट पद्धत:', 50, infoY + lineH * 4);
+        ctx.fillStyle = '#2d3748';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.fillText(paymentMode, 200, infoY + lineH * 4);
+
+        // Bottom decorative line
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.beginPath();
+        ctx.moveTo(40, 370);
+        ctx.lineTo(560, 370);
+        ctx.stroke();
+
+        // Footer
+        ctx.fillStyle = '#a0aec0';
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('This is a computer-generated receipt. | बिरदेव जयंती उत्सव समिती', 300, 395);
+
+        // Bottom gold bar
+        ctx.fillStyle = '#d69e2e';
+        ctx.fillRect(0, 410, 600, 10);
+
+        // Show receipt in modal
+        this.showReceiptModal(canvas, name);
+    },
+
+    showReceiptModal(canvas, name) {
+        // Remove any existing modal
+        const existing = document.getElementById('receipt-overlay');
+        if (existing) existing.remove();
+
+        const overlay = document.createElement('div');
+        overlay.className = 'receipt-overlay';
+        overlay.id = 'receipt-overlay';
+        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+
+        overlay.innerHTML = `
+            <div class="receipt-modal">
+                <button class="receipt-close" onclick="document.getElementById('receipt-overlay').remove()">&times;</button>
+                <h3 style="text-align: center; margin-bottom: 0.5rem; color: var(--primary-dark);">
+                    <i class="fa-solid fa-file-invoice"></i> देणगी पावती (Receipt)
+                </h3>
+                <div class="receipt-canvas-wrapper" id="receipt-canvas-wrapper"></div>
+                <div class="receipt-actions">
+                    <button class="btn btn-success" onclick="app.downloadReceipt()">
+                        <i class="fa-solid fa-download"></i> Download
+                    </button>
+                    <button class="btn btn-danger" onclick="document.getElementById('receipt-overlay').remove()">
+                        <i class="fa-solid fa-xmark"></i> Close
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+        document.getElementById('receipt-canvas-wrapper').appendChild(canvas);
+
+        // Store for download
+        this._receiptCanvas = canvas;
+        this._receiptName = name;
+    },
+
+    downloadReceipt() {
+        if (!this._receiptCanvas) return;
+        const link = document.createElement('a');
+        link.download = `Receipt_${this._receiptName || 'Donation'}.png`;
+        link.href = this._receiptCanvas.toDataURL('image/png');
+        link.click();
     }
 };
 

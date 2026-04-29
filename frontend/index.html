@@ -97,6 +97,17 @@
                         </div>
                     </div>
 
+                    <!-- Public Search Bar (नाव शोधा) -->
+                    <div class="search-container">
+                        <div class="search-input-wrapper">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="public-search-input" placeholder="तुमचे नाव शोधा... (Search your name)" oninput="app.searchDonor(this.value)" autocomplete="off">
+                        </div>
+                        <div class="search-results-dropdown" id="search-results-dropdown">
+                            <!-- JS populated -->
+                        </div>
+                    </div>
+
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-icon yellow"><i class="fa-solid fa-users"></i></div>
