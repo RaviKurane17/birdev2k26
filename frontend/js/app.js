@@ -933,6 +933,21 @@ const app = {
         canvas.height = H;
         const ctx = canvas.getContext('2d');
 
+        // Helper for rounded rectangles (compatible with older browsers)
+        const roundedRect = (ctx, x, y, width, height, radius) => {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        };
+
         // === GOLD CERTIFICATE BACKGROUND ===
         const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
         bgGrad.addColorStop(0, '#fdf6e3');
@@ -1074,18 +1089,15 @@ const app = {
         stampGrad.addColorStop(0.5, '#d69e2e');
         stampGrad.addColorStop(1, '#ecc94b');
         ctx.fillStyle = stampGrad;
-        ctx.beginPath();
-        ctx.roundRect(W / 2 - 80, stampY, 160, 45, 8);
+        roundedRect(ctx, W / 2 - 80, stampY, 160, 45, 8);
         ctx.fill();
         // Shadow
         ctx.fillStyle = 'rgba(0,0,0,0.1)';
-        ctx.beginPath();
-        ctx.roundRect(W / 2 - 78, stampY + 3, 160, 45, 8);
+        roundedRect(ctx, W / 2 - 78, stampY + 3, 160, 45, 8);
         ctx.fill();
         // Re-draw badge on top
         ctx.fillStyle = stampGrad;
-        ctx.beginPath();
-        ctx.roundRect(W / 2 - 80, stampY, 160, 45, 8);
+        roundedRect(ctx, W / 2 - 80, stampY, 160, 45, 8);
         ctx.fill();
         // PAID text
         ctx.fillStyle = '#ffffff';
@@ -1096,13 +1108,11 @@ const app = {
         // === VERIFIED BADGE ===
         const verifyY = stampY + 60;
         ctx.fillStyle = 'rgba(22, 163, 74, 0.12)';
-        ctx.beginPath();
-        ctx.roundRect(W / 2 - 140, verifyY, 280, 38, 19);
+        roundedRect(ctx, W / 2 - 140, verifyY, 280, 38, 19);
         ctx.fill();
         ctx.strokeStyle = '#16a34a';
         ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.roundRect(W / 2 - 140, verifyY, 280, 38, 19);
+        roundedRect(ctx, W / 2 - 140, verifyY, 280, 38, 19);
         ctx.stroke();
         ctx.fillStyle = '#16a34a';
         ctx.font = 'bold 13px sans-serif';
@@ -1131,7 +1141,7 @@ const app = {
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 10px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('BIRDEV JAYANTI UTSAV SAMITI | birdev2k26.vercel.app', W / 2, H - 28);
+        ctx.fillText('BIRDEV JAYANTI UTSAV SAMITI | birdev2k26.vercel.app | @Ravi Kurane♦️', W / 2, H - 28);
 
         // === LARGE WATERMARK ===
         ctx.save();
@@ -1177,7 +1187,9 @@ const app = {
         `;
 
         document.body.appendChild(overlay);
-        document.getElementById('receipt-canvas-wrapper').appendChild(canvas);
+        if (canvas) {
+            document.getElementById('receipt-canvas-wrapper').appendChild(canvas);
+        }
 
         // Store for download / share
         this._receiptCanvas = canvas;
