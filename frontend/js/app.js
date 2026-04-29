@@ -961,15 +961,15 @@ const app = {
         ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, W, H);
 
-        // === SHREE RAM WATERMARK (Integrated Background) ===
+        // === SHREE RAM WATERMARK (Full-Scale Integration) ===
         if (ramImg) {
             ctx.save();
-            ctx.globalAlpha = 0.15;
-            ctx.globalCompositeOperation = 'multiply'; // Makes white background transparent
-            const ramW = 500;
+            ctx.globalAlpha = 0.12;
+            ctx.globalCompositeOperation = 'multiply';
+            const ramW = 580; // Increased size to near full-width
             const ramH = (ramImg.height / ramImg.width) * ramW;
-            // Positioned to fill the background area
-            ctx.drawImage(ramImg, (W - ramW) / 2, H - ramH - 100, ramW, ramH);
+            // Offset shifted: ~15mm to right (+50px) and ~30mm up (shifted y to 140)
+            ctx.drawImage(ramImg, (W - ramW) / 2 + 30, 140, ramW, ramH);
             ctx.restore();
         }
 
@@ -1067,12 +1067,12 @@ const app = {
             ctx.font = '14px sans-serif';
             ctx.textAlign = 'left';
             ctx.fillText(label, labelX, y);
-            
+
             // Value - Aligned slightly to the right for balance
             ctx.fillStyle = valueColor;
             ctx.font = `bold ${valueFontSize} sans-serif`;
             ctx.fillText(value, valueX + 20, y);
-            
+
             // Subtle underline for each row
             ctx.strokeStyle = 'rgba(139, 105, 20, 0.1)';
             ctx.lineWidth = 0.5;
@@ -1233,7 +1233,7 @@ const app = {
     shareWhatsApp() {
         const name = this._receiptName || 'Donor';
         const amount = this._receiptAmount || '';
-        const message = `🏛️ *बिरदेव जयंती उत्सव समिती 2K26*\n\n✅ *देणगी पावती (Donation Receipt)*\n\n👤 नाव: *${name}*\n💰 रक्कम: *₹ ${amount}*\n📅 तारीख: ${new Date().toLocaleDateString('en-IN')}\n\n✨ देणगी यशस्वीरित्या जमा झाली!\n🌐 Website: birdev2k26.vercel.app\n @Ravi Kurane♦️`;
+        const message = `🏛️ *बिरदेव जयंती उत्सव समिती 2K26*\n\n✅ *देणगी पावती (Donation Receipt)*\n\n👤 नाव: *${name}*\n💰 रक्कम: *₹ ${amount}*\n📅 तारीख: ${new Date().toLocaleDateString('en-IN')}\n\n✨ देणगी यशस्वीरित्या जमा झाली!\n🌐 Website: birdev2k26.vercel.app`;
 
         const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
         window.open(url, '_blank');
