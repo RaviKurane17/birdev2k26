@@ -134,6 +134,11 @@ router.delete('/donations/:id', verifyToken, async (req, res) => {
 // Update a donation status (Admin only)
 router.put('/donations/:id', verifyToken, async (req, res) => {
     try {
+        // Auto-migrate paymentMode from ENUM to VARCHAR if needed
+        try {
+            await db.query("ALTER TABLE donations MODIFY COLUMN paymentMode VARCHAR(50) NULL");
+        } catch(e) {} // Ignore if already VARCHAR
+
         const { isPaid, paymentMode, date } = req.body;
         await db.query(
             'UPDATE donations SET isPaid = ?, paymentMode = ?, date = ? WHERE id = ?',

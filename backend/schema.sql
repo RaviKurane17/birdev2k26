@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS donations (
     name VARCHAR(255) NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
     isPaid BOOLEAN DEFAULT FALSE,
-    paymentMode ENUM('Cash', 'Online') NULL,
+    paymentMode VARCHAR(50) NULL,
     date DATE NULL,
     surnameCategory VARCHAR(100) NOT NULL,
     eventName VARCHAR(100) DEFAULT 'बिरदेव जयंती २०२४'

@@ -186,7 +186,12 @@ const adminApp = {
                     </div>
                     ` : ''}
                     <div style="margin-top: 1rem; border-top: 1px dashed #ccc; padding-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        ${!d.isPaid ? `<button class="btn btn-success" style="padding: 0.2rem 0.5rem;" onclick="adminApp.markPaid(${d.id}, '${d.screenshot_url ? 'Online' : 'Cash'}')">Mark Paid</button>` : ''}
+                        ${!d.isPaid ? `
+                        <select id="mode-select-${d.id}" style="padding: 0.3rem; border-radius: 4px; border: 1px solid #ccc; font-size: 0.85rem;">
+                            <option value="Cash" ${!d.screenshot_url ? 'selected' : ''}>Cash</option>
+                            <option value="Online" ${d.screenshot_url ? 'selected' : ''}>Online</option>
+                        </select>
+                        <button class="btn btn-success" style="padding: 0.2rem 0.5rem;" onclick="adminApp.markPaid(${d.id}, document.getElementById('mode-select-${d.id}').value)">Mark Paid</button>` : ''}
                         <button class="btn btn-danger" style="padding: 0.2rem 0.5rem;" onclick="adminApp.deleteDonation(${d.id})"><i class="fa-solid fa-trash"></i> Delete</button>
                     </div>
                 </div>
@@ -246,8 +251,12 @@ const adminApp = {
                         </a>
                     </div>
                     ` : ''}
-                    <div class="admin-actions-cell" style="display:flex; gap:0.5rem; margin-top: 1rem; flex-wrap: wrap;">
-                        <button class="btn btn-success" onclick="adminApp.markPaid(${d.id}, '${d.screenshot_url ? 'Online' : 'Cash'}')">Approve (Mark Paid)</button>
+                    <div class="admin-actions-cell" style="display:flex; gap:0.5rem; margin-top: 1rem; flex-wrap: wrap; align-items: center;">
+                        <select id="pending-mode-${d.id}" style="padding: 0.4rem; border-radius: 4px; border: 1px solid #ccc; font-size: 0.9rem;">
+                            <option value="Cash" ${!d.screenshot_url ? 'selected' : ''}>Cash</option>
+                            <option value="Online" ${d.screenshot_url ? 'selected' : ''}>Online</option>
+                        </select>
+                        <button class="btn btn-success" onclick="adminApp.markPaid(${d.id}, document.getElementById('pending-mode-${d.id}').value)">Approve (Mark Paid)</button>
                         <button class="btn btn-danger" onclick="adminApp.deleteDonation(${d.id})">Delete</button>
                     </div>
                 </div>
@@ -257,9 +266,8 @@ const adminApp = {
         }
     },
 
-    async markPaid(id, defaultMode = 'Cash') {
-        const mode = prompt("Payment Mode (Cash/Online):", defaultMode);
-        if(!mode) return;
+    async markPaid(id, mode) {
+        if(!mode) mode = 'Cash';
         try {
             await window.api.updateDonation(id, {
                 isPaid: true,
