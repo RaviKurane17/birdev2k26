@@ -964,12 +964,12 @@ const app = {
         // === SHREE RAM WATERMARK (Full-Scale Integration) ===
         if (ramImg) {
             ctx.save();
-            ctx.globalAlpha = 0.12;
+            ctx.globalAlpha = 0.10; // Slightly more subtle for premium look
             ctx.globalCompositeOperation = 'multiply';
-            const ramW = 580; // Increased size to near full-width
+            const ramW = 560; 
             const ramH = (ramImg.height / ramImg.width) * ramW;
-            // Offset shifted: ~15mm to right (+50px) and ~30mm up (shifted y to 140)
-            ctx.drawImage(ramImg, (W - ramW) / 2 + 30, 140, ramW, ramH);
+            // Perfectly centered horizontally, positioned below header
+            ctx.drawImage(ramImg, (W - ramW) / 2, 150, ramW, ramH);
             ctx.restore();
         }
 
