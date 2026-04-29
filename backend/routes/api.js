@@ -54,7 +54,7 @@ const verifyToken = (req, res, next) => {
     });
 };
 
-// --- UPLOAD ROUTE ---
+// --- UPLOAD ROUTE (Admin) ---
 router.post('/upload', verifyToken, upload.single('image'), (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
     
@@ -64,6 +64,21 @@ router.post('/upload', verifyToken, upload.single('image'), (req, res) => {
     }
 
     // Otherwise, construct a local URL (works for development)
+    const relativePath = req.file.path.replace(/\\/g, '/');
+    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT || 5000}`;
+    const finalUrl = `${baseUrl}/${relativePath}`;
+    
+    res.json({ url: finalUrl });
+});
+
+// --- UPLOAD ROUTE (Public - for donation screenshots) ---
+router.post('/upload-screenshot', upload.single('image'), (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    
+    if (req.file.path.startsWith('http')) {
+        return res.json({ url: req.file.path });
+    }
+
     const relativePath = req.file.path.replace(/\\/g, '/');
     const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT || 5000}`;
     const finalUrl = `${baseUrl}/${relativePath}`;
@@ -103,17 +118,23 @@ router.get('/donations', async (req, res) => {
 // Add a donation (Publicly accessible, creates a pledge)
 router.post('/donations', async (req, res) => {
     try {
-        const { name, amount, surnameCategory, eventName, screenshotUrl } = req.body;
+        const { name, amount, surnameCategory, eventName, screenshotUrl, paymentMode } = req.body;
         const evt = eventName || 'बिरदेव जयंती 2026';
+        const mode = paymentMode || (screenshotUrl ? 'Online' : null);
         
         // Auto-add screenshot_url column if it doesn't exist yet
         try {
             await db.query("ALTER TABLE donations ADD COLUMN screenshot_url VARCHAR(500) DEFAULT NULL");
         } catch(e) {} // Ignore if column already exists
 
+        // Auto-migrate paymentMode from ENUM to VARCHAR if needed
+        try {
+            await db.query("ALTER TABLE donations MODIFY COLUMN paymentMode VARCHAR(50) NULL");
+        } catch(e) {}
+
         const [result] = await db.query(
-            'INSERT INTO donations (name, amount, surnameCategory, isPaid, eventName, screenshot_url) VALUES (?, ?, ?, false, ?, ?)',
-            [name, amount, surnameCategory, evt, screenshotUrl || null]
+            'INSERT INTO donations (name, amount, surnameCategory, isPaid, eventName, screenshot_url, paymentMode) VALUES (?, ?, ?, false, ?, ?, ?)',
+            [name, amount, surnameCategory, evt, screenshotUrl || null, mode]
         );
         res.json({ id: result.insertId, message: 'Donation pledge added successfully' });
     } catch (err) {

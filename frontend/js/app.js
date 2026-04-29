@@ -727,14 +727,16 @@ const app = {
         if(!surname || !name || !amount) return alert('कृपया सर्व माहिती भरा (Please fill all fields)');
 
         try {
-            // Upload screenshot if available
+            // Upload screenshot if available (public route, no auth needed)
             let screenshotUrl = '';
             if(screenshotInput.files.length > 0) {
                 try {
-                    const res = await window.api.uploadImage(screenshotInput.files[0]);
+                    const res = await window.api.uploadScreenshot(screenshotInput.files[0]);
                     screenshotUrl = res.url;
                 } catch(e) {
-                    console.warn('Screenshot upload failed, continuing without it');
+                    console.warn('Screenshot upload failed:', e);
+                    alert('Screenshot upload failed. Please try again.');
+                    return;
                 }
             }
 
@@ -743,7 +745,8 @@ const app = {
                 amount, 
                 surnameCategory: surname, 
                 eventName: 'बिरदेव जयंती २०२६',
-                screenshotUrl
+                screenshotUrl,
+                paymentMode: screenshotUrl ? 'Online' : 'Cash'
             });
 
             alert('तुमची देणगी नोंद यशस्वी झाली! Admin verify करेल.');

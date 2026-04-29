@@ -278,8 +278,9 @@ const adminApp = {
             const donations = await window.api.getDonations();
             const pending = donations.filter(d => !d.isPaid);
 
-            const onlinePending = pending.filter(d => d.screenshot_url);
-            const cashPending = pending.filter(d => !d.screenshot_url);
+            // Split: Online = has screenshot OR paymentMode is 'Online'
+            const onlinePending = pending.filter(d => d.screenshot_url || d.paymentMode === 'Online');
+            const cashPending = pending.filter(d => !d.screenshot_url && d.paymentMode !== 'Online');
 
             // Update counts
             document.getElementById('pending-online-count').innerText = onlinePending.length;
@@ -298,7 +299,7 @@ const adminApp = {
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                                 <span class="status-badge paid" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white;">Online</span>
-                                <span style="font-size: 0.75rem; color: var(--text-light);"><i class="fa-solid fa-chevron-down"></i> Screenshot</span>
+                                ${d.screenshot_url ? '<span style="font-size: 0.75rem; color: var(--text-light);"><i class="fa-solid fa-chevron-down"></i> Screenshot</span>' : ''}
                             </div>
                         </div>
                         ${d.screenshot_url ? `
@@ -310,7 +311,11 @@ const adminApp = {
                         </div>
                         ` : ''}
                         <div class="donor-details" onclick="event.stopPropagation()" style="border-top: 1px dashed #ccc; padding-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
-                            <button class="btn btn-success" onclick="adminApp.markPaid(${d.id}, 'Online')"><i class="fa-solid fa-check"></i> Approve (Online)</button>
+                            <select id="pending-mode-${d.id}" style="padding: 0.4rem; border-radius: 4px; border: 1px solid #ccc; font-size: 0.9rem;">
+                                <option value="Online" selected>Online</option>
+                                <option value="Cash">Cash</option>
+                            </select>
+                            <button class="btn btn-success" onclick="adminApp.markPaid(${d.id}, document.getElementById('pending-mode-${d.id}').value)"><i class="fa-solid fa-check"></i> Approve</button>
                             <button class="btn btn-danger" onclick="adminApp.deleteDonation(${d.id})"><i class="fa-solid fa-trash"></i> Delete</button>
                         </div>
                     </div>
@@ -331,7 +336,11 @@ const adminApp = {
                             <span class="status-badge" style="background: #dcfce7; color: #16a34a;">Cash</span>
                         </div>
                         <div style="margin-top: 1rem; border-top: 1px dashed #ccc; padding-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
-                            <button class="btn btn-success" onclick="adminApp.markPaid(${d.id}, 'Cash')"><i class="fa-solid fa-check"></i> Approve (Cash)</button>
+                            <select id="cash-mode-${d.id}" style="padding: 0.4rem; border-radius: 4px; border: 1px solid #ccc; font-size: 0.9rem;">
+                                <option value="Cash" selected>Cash</option>
+                                <option value="Online">Online</option>
+                            </select>
+                            <button class="btn btn-success" onclick="adminApp.markPaid(${d.id}, document.getElementById('cash-mode-${d.id}').value)"><i class="fa-solid fa-check"></i> Approve</button>
                             <button class="btn btn-danger" onclick="adminApp.deleteDonation(${d.id})"><i class="fa-solid fa-trash"></i> Delete</button>
                         </div>
                     </div>

@@ -153,7 +153,7 @@ const api = {
         return this.handleResponse(res);
     },
 
-    // --- Upload ---
+    // --- Upload (Admin - requires auth) ---
     async uploadImage(file) {
         const formData = new FormData();
         formData.append('image', file);
@@ -164,6 +164,18 @@ const api = {
         const res = await fetch(`${API_URL}/upload`, {
             method: 'POST',
             headers: headers, // Do NOT set Content-Type, fetch will set it automatically with boundary
+            body: formData
+        });
+        return this.handleResponse(res);
+    },
+
+    // --- Upload Screenshot (Public - no auth needed) ---
+    async uploadScreenshot(file) {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const res = await fetch(`${API_URL}/upload-screenshot`, {
+            method: 'POST',
             body: formData
         });
         return this.handleResponse(res);
