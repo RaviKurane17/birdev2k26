@@ -1141,7 +1141,7 @@ const app = {
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 10px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('BIRDEV JAYANTI UTSAV SAMITI | birdev2k26.vercel.app | @Ravi Kurane♦️', W / 2, H - 28);
+        ctx.fillText('BIRDEV JAYANTI UTSAV SAMITI 2026 | birdev2k26.vercel.app | @Ravi Kurane♦️', W / 2, H - 28);
 
         // === LARGE WATERMARK ===
         ctx.save();
