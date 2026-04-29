@@ -667,6 +667,32 @@ const app = {
         } catch(e) { console.error(e); }
     },
 
+    async payViaUPI(amountId, nameId) {
+        const amount = document.getElementById(amountId).value;
+        const name = document.getElementById(nameId).value;
+        if(!amount || amount <= 0) return alert('कृपया रक्कम भरा (Please enter an amount first)');
+        
+        try {
+            const upiIdSetting = await window.api.getSetting('upiId');
+            if(!upiIdSetting || !upiIdSetting.value || upiIdSetting.value === 'Not available') {
+                return alert('UPI ID उपलब्ध नाही. कृपया स्कॅनर वापरा.');
+            }
+            
+            const upiId = upiIdSetting.value;
+            const payeeName = "Birdev Jayanti"; // Can be dynamic
+            const transactionNote = name ? `Donation by ${name}` : 'Donation';
+            
+            // Construct UPI intent link
+            const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(transactionNote)}`;
+            
+            // Open link (triggers UPI app selection on mobile)
+            window.location.href = upiLink;
+        } catch(err) {
+            console.error(err);
+            alert('Error generating UPI link');
+        }
+    },
+
     previewScreenshot(input) {
         const preview = document.getElementById('screenshot-preview');
         const area = document.getElementById('screenshot-upload-area');

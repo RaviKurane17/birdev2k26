@@ -235,6 +235,11 @@
                                     <label>रक्कम (Amount ₹)</label>
                                     <input type="number" id="home-donate-amount" placeholder="₹">
                                 </div>
+                                <div style="margin-bottom: 1rem;">
+                                    <button class="btn full-width" style="background: linear-gradient(135deg, #16a34a, #15803d); color: white; border: none; padding: 0.8rem; border-radius: var(--radius); display: flex; justify-content: center; align-items: center; gap: 0.5rem; font-weight: 600;" onclick="app.payViaUPI('home-donate-amount', 'home-donate-name')">
+                                        <i class="fa-solid fa-mobile-screen-button"></i> Pay Directly via UPI App
+                                    </button>
+                                </div>
                                 <div class="form-group">
                                     <label>पेमेंट स्क्रीनशॉट (Payment Screenshot)</label>
                                     <div class="screenshot-upload-area" id="screenshot-upload-area" onclick="document.getElementById('home-donate-screenshot').click()">
@@ -439,6 +444,11 @@
                             <div class="form-group">
                                 <label>रक्कम (Amount)</label>
                                 <input type="number" id="public-donor-amount" required>
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <button class="btn full-width" style="background: linear-gradient(135deg, #16a34a, #15803d); color: white; border: none; padding: 0.8rem; border-radius: var(--radius); display: flex; justify-content: center; align-items: center; gap: 0.5rem; font-weight: 600;" onclick="app.payViaUPI('public-donor-amount', 'public-donor-name')">
+                                    <i class="fa-solid fa-mobile-screen-button"></i> Pay Directly via UPI App
+                                </button>
                             </div>
                             <div class="form-group">
                                 <label>आडनाव गट (Surname Category)</label>
