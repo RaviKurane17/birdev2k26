@@ -196,6 +196,58 @@ const api = {
             body: JSON.stringify(data)
         });
         return this.handleResponse(res);
+    },
+
+    // --- Previous Donations ---
+    async getPreviousDonations() {
+        const res = await fetch(`${API_URL}/previous-donations`);
+        return this.handleResponse(res);
+    },
+    async addPreviousDonation(data) {
+        const res = await fetch(`${API_URL}/previous-donations`, {
+            method: 'POST',
+            headers: this.getHeaders(),
+            body: JSON.stringify(data)
+        });
+        return this.handleResponse(res);
+    },
+    async updatePreviousDonation(id, data) {
+        const res = await fetch(`${API_URL}/previous-donations/${id}`, {
+            method: 'PUT',
+            headers: this.getHeaders(),
+            body: JSON.stringify(data)
+        });
+        return this.handleResponse(res);
+    },
+    async deletePreviousDonation(id) {
+        const res = await fetch(`${API_URL}/previous-donations/${id}`, {
+            method: 'DELETE',
+            headers: this.getHeaders()
+        });
+        return this.handleResponse(res);
+    },
+
+    // --- Feedbacks ---
+    async getFeedbacks() {
+        const res = await fetch(`${API_URL}/feedbacks`, {
+            headers: this.getHeaders()
+        });
+        return this.handleResponse(res);
+    },
+    async addFeedback(data) {
+        const res = await fetch(`${API_URL}/feedbacks`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        return this.handleResponse(res);
+    },
+    async deleteFeedback(id) {
+        const res = await fetch(`${API_URL}/feedbacks/${id}`, {
+            method: 'DELETE',
+            headers: this.getHeaders()
+        });
+        return this.handleResponse(res);
     }
 };
 

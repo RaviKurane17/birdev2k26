@@ -36,6 +36,8 @@ const adminApp = {
                 if(view === 'surnames') this.loadSurnamesView();
                 if(view === 'special') this.loadSpecialDonorsAdmin();
                 if(view === 'committee') this.loadCommitteeView();
+                if(view === 'previous') this.loadPreviousDonations();
+                if(view === 'feedbacks') this.loadFeedbacks();
                 if(view === 'settings') this.loadSettingsView();
             });
         });
@@ -460,6 +462,99 @@ const adminApp = {
         }
     },
 
+    // --- PREVIOUS DONATIONS ---
+    async loadPreviousDonations() {
+        const tbody = document.getElementById('admin-previous-table');
+        if (!tbody) return;
+        try {
+            const data = await window.api.getPreviousDonations();
+            tbody.innerHTML = data.map(d => `
+                <tr>
+                    <td>${d.description}</td>
+                    <td>₹ ${d.amount}</td>
+                    <td style="text-align: right;">
+                        <button class="btn btn-primary" style="padding: 0.2rem 0.5rem; margin-right: 0.5rem;" onclick="adminApp.editPreviousDonation(${d.id}, '${d.description}', ${d.amount})"><i class="fa-solid fa-edit"></i></button>
+                        <button class="btn btn-danger" style="padding: 0.2rem 0.5rem;" onclick="adminApp.deletePreviousDonation(${d.id})"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch(err) {
+            console.error(err);
+        }
+    },
+
+    async addPreviousDonation() {
+        const amount = document.getElementById('prev-amount').value;
+        const description = document.getElementById('prev-desc').value;
+        const isEditing = document.getElementById('prev-amount').dataset.editId;
+
+        if(!amount) return alert('रक्कम भरणे आवश्यक आहे.');
+        
+        try {
+            if (isEditing) {
+                await window.api.updatePreviousDonation(isEditing, { amount, description });
+                document.getElementById('prev-amount').removeAttribute('data-edit-id');
+                document.querySelector('#view-previous .add-form .btn-success').innerHTML = '<i class="fa-solid fa-plus"></i> Add';
+            } else {
+                await window.api.addPreviousDonation({ amount, description });
+            }
+            document.getElementById('prev-amount').value = '';
+            document.getElementById('prev-desc').value = 'मागील शिल्लक';
+            this.loadPreviousDonations();
+        } catch(err) {
+            alert(err.message);
+        }
+    },
+
+    editPreviousDonation(id, desc, amount) {
+        document.getElementById('prev-desc').value = desc;
+        document.getElementById('prev-amount').value = amount;
+        document.getElementById('prev-amount').dataset.editId = id;
+        document.querySelector('#view-previous .add-form .btn-success').innerHTML = '<i class="fa-solid fa-save"></i> Save';
+    },
+
+    async deletePreviousDonation(id) {
+        if(!confirm('ही मागील शिल्लक डिलीट करायची आहे का?')) return;
+        try {
+            await window.api.deletePreviousDonation(id);
+            this.loadPreviousDonations();
+        } catch(err) {
+            alert(err.message);
+        }
+    },
+
+    // --- FEEDBACKS ---
+    async loadFeedbacks() {
+        const tbody = document.getElementById('admin-feedbacks-table');
+        if (!tbody) return;
+        try {
+            const feedbacks = await window.api.getFeedbacks();
+            tbody.innerHTML = feedbacks.map(f => `
+                <tr>
+                    <td>${new Date(f.created_at).toLocaleDateString()}</td>
+                    <td>${f.name}</td>
+                    <td>${f.mobile || '-'}</td>
+                    <td>${f.message}</td>
+                    <td style="text-align: right;">
+                        <button class="btn btn-danger" style="padding: 0.2rem 0.5rem;" onclick="adminApp.deleteFeedback(${f.id})"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch(err) {
+            console.error(err);
+        }
+    },
+
+    async deleteFeedback(id) {
+        if(!confirm('हा फीडबॅक डिलीट करायचा आहे का?')) return;
+        try {
+            await window.api.deleteFeedback(id);
+            this.loadFeedbacks();
+        } catch(err) {
+            alert(err.message);
+        }
+    },
+
     // --- SETTINGS ---
     async loadSettingsView() {
         try {
@@ -482,6 +577,13 @@ const adminApp = {
                 scannerImg.src = scanner.value;
                 scannerImg.style.display = 'block';
             }
+
+            // Load UPI ID
+            const upiId = await window.api.getSetting('upiId');
+            if(upiId && upiId.value) {
+                const upiInput = document.getElementById('settings-upi-id');
+                if (upiInput) upiInput.value = upiId.value;
+            }
         } catch(err) {
             console.error(err);
         }
@@ -492,6 +594,16 @@ const adminApp = {
         try {
             await window.api.updateSetting('newsTicker', value);
             alert('News Ticker updated successfully!');
+        } catch(err) {
+            alert(err.message);
+        }
+    },
+
+    async updateUPI() {
+        const value = document.getElementById('settings-upi-id').value;
+        try {
+            await window.api.updateSetting('upiId', value);
+            alert('UPI ID updated successfully!');
         } catch(err) {
             alert(err.message);
         }

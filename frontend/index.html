@@ -196,8 +196,17 @@
                             <div class="donate-panel-scanner">
                                 <h3><i class="fa-solid fa-qrcode"></i> स्कॅन करा आणि पेमेंट करा</h3>
                                 <div class="donate-panel-qr">
-                                    <img id="home-scanner-qr" src="images/qr.webp" alt="QR Code / Scanner"
-                                        onerror="this.src='https://via.placeholder.com/200?text=Scan+to+Pay'">
+                                    <a id="home-scanner-link" href="images/qr.webp" download="Birdev_Scanner_QR.png" title="Download Scanner">
+                                        <img id="home-scanner-qr" src="images/qr.webp" alt="QR Code / Scanner"
+                                            onerror="this.src='https://via.placeholder.com/200?text=Scan+to+Pay'">
+                                    </a>
+                                </div>
+                                <div class="upi-id-display" style="margin-top: 1rem; background: rgba(0,0,0,0.02); padding: 0.8rem; border-radius: var(--radius); border: 1px dashed var(--primary-color);">
+                                    <p style="margin-bottom: 0.3rem; font-size: 0.8rem; font-weight: 600;">UPI ID:</p>
+                                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                        <input type="text" id="home-upi-id" value="Not available" readonly style="flex: 1; padding: 0.4rem; border: 1px solid var(--border-color); border-radius: 4px; background: #fff; font-size: 0.9rem; text-align: center;">
+                                        <button class="btn btn-primary btn-sm" onclick="app.copyUPI('home-upi-id')" title="Copy UPI ID" style="padding: 0.4rem 0.8rem;"><i class="fa-regular fa-copy"></i></button>
+                                    </div>
                                 </div>
                                 <p style="color: var(--text-light); font-size: 0.85rem; margin-top: 0.5rem;">पेमेंट केल्यानंतर खालील फॉर्म भरा</p>
                             </div>
@@ -274,6 +283,23 @@
                         <div class="committee-grid" id="home-committee-grid">
                             <!-- Populated via JS -->
                         </div>
+                        
+                        <div class="feedback-section" style="margin-top: 3rem; background: var(--bg-light); padding: 2rem; border-radius: var(--radius); border: 1px solid var(--border-color);">
+                            <h2 class="section-title" style="margin-bottom: 1rem;"><i class="fa-solid fa-comment-dots"></i> अभिप्राय / सूचना (Feedback)</h2>
+                            <p style="margin-bottom: 1.5rem; color: var(--text-light); text-align: center;">आपल्या काही सूचना, प्रश्न किंवा अभिप्राय असतील तर खालील फॉर्म भरा.</p>
+                            <div class="form-group">
+                                <input type="text" id="feedback-name" placeholder="तुमचे नाव (Your Name)" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: var(--radius); margin-bottom: 1rem;">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="feedback-mobile" placeholder="मोबाईल नंबर (Mobile Number)" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: var(--radius); margin-bottom: 1rem;">
+                            </div>
+                            <div class="form-group">
+                                <textarea id="feedback-message" placeholder="तुमचा संदेश (Your Message)" rows="4" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: var(--radius); margin-bottom: 1rem;"></textarea>
+                            </div>
+                            <button class="btn btn-primary" style="width: 100%; padding: 0.8rem;" onclick="app.submitFeedback()">
+                                <i class="fa-solid fa-paper-plane"></i> पाठवा (Submit)
+                            </button>
+                        </div>
                     </div>
                 </section>
 
@@ -323,6 +349,10 @@
                             <h3>Remaining Balance</h3>
                             <h1 id="dash-balance">₹ 0</h1>
                         </div>
+                        <div class="dash-card previous" style="background: linear-gradient(135deg, #8e2de2, #4a00e0); color: white;">
+                            <h3>मागील शिल्लक (Previous)</h3>
+                            <h1 id="dash-previous" style="color: white;">₹ 0</h1>
+                        </div>
                     </div>
 
                     <div class="expenses-section" id="admin-expenses-section" style="display: none;">
@@ -369,10 +399,19 @@
                             <h3>ऑनलाईन देणगी भरण्यासाठी स्कॅन करा</h3>
                             <div class="qr-placeholder" id="scanner-qr-container">
                                 <!-- Scanner image from admin or fallback -->
-                                <img id="scanner-qr-image" src="images/qr.webp" alt="QR Code / Scanner"
-                                    onerror="this.src='https://via.placeholder.com/200?text=Scan+to+Pay'">
+                                <a id="public-scanner-link" href="images/qr.webp" download="Birdev_Scanner_QR.png" title="Download Scanner">
+                                    <img id="scanner-qr-image" src="images/qr.webp" alt="QR Code / Scanner"
+                                        onerror="this.src='https://via.placeholder.com/200?text=Scan+to+Pay'">
+                                </a>
                             </div>
-                            <p>Once paid, please fill out the form to notify the Admin.</p>
+                            <div class="upi-id-display" style="margin-top: 1rem; background: var(--bg-light); padding: 1rem; border-radius: var(--radius); border: 1px dashed var(--primary-color);">
+                                <p style="margin-bottom: 0.5rem; color: var(--text-dark); font-weight: 600;">UPI ID:</p>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <input type="text" id="public-upi-id" value="Not available" readonly style="flex: 1; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius); background: #fff; text-align: center;">
+                                    <button class="btn btn-primary" onclick="app.copyUPI('public-upi-id')" title="Copy UPI ID"><i class="fa-regular fa-copy"></i></button>
+                                </div>
+                            </div>
+                            <p style="margin-top: 1rem;">Once paid, please fill out the form to notify the Admin.</p>
                         </div>
 
                         <div class="public-donation-form"

@@ -57,3 +57,17 @@ CREATE TABLE IF NOT EXISTS special_donors (
 
 INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('newsTicker', 'नवीन अपडेट: बिरदेव जयंती २०२४ ची तयारी सुरू झाली आहे!');
 
+CREATE TABLE IF NOT EXISTS previous_donations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    amount DECIMAL(10, 2) DEFAULT 0,
+    description VARCHAR(255) DEFAULT 'मागील शिल्लक रक्कम',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS feedbacks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    mobile VARCHAR(20),
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

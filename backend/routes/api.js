@@ -349,4 +349,100 @@ router.put('/special-donors/:id', verifyToken, async (req, res) => {
     }
 });
 
+// --- PREVIOUS DONATIONS (Magil Shillak Rakkam) ---
+router.get('/previous-donations', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT * FROM previous_donations ORDER BY created_at DESC');
+        res.json(rows);
+    } catch (err) {
+        if (err.code === 'ER_NO_SUCH_TABLE') return res.json([]);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.post('/previous-donations', verifyToken, async (req, res) => {
+    try {
+        const { amount, description } = req.body;
+        const [result] = await db.query(
+            'INSERT INTO previous_donations (amount, description) VALUES (?, ?)',
+            [amount || 0, description || 'मागील शिल्लक रक्कम']
+        );
+        res.json({ id: result.insertId, message: 'Previous donation added successfully' });
+    } catch (err) {
+        if (err.code === 'ER_NO_SUCH_TABLE') {
+            await db.query(`CREATE TABLE IF NOT EXISTS previous_donations (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                amount DECIMAL(10, 2) DEFAULT 0,
+                description VARCHAR(255) DEFAULT 'मागील शिल्लक रक्कम',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )`);
+            const { amount, description } = req.body;
+            const [result] = await db.query(
+                'INSERT INTO previous_donations (amount, description) VALUES (?, ?)',
+                [amount || 0, description || 'मागील शिल्लक रक्कम']
+            );
+            return res.json({ id: result.insertId, message: 'Previous donation added successfully' });
+        }
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.put('/previous-donations/:id', verifyToken, async (req, res) => {
+    try {
+        const { amount, description } = req.body;
+        await db.query('UPDATE previous_donations SET amount = ?, description = ? WHERE id = ?', [amount, description, req.params.id]);
+        res.json({ message: 'Previous donation updated successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.delete('/previous-donations/:id', verifyToken, async (req, res) => {
+    try {
+        await db.query('DELETE FROM previous_donations WHERE id = ?', [req.params.id]);
+        res.json({ message: 'Previous donation deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- FEEDBACK ROUTES ---
+router.get('/feedbacks', verifyToken, async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT * FROM feedbacks ORDER BY created_at DESC');
+        res.json(rows);
+    } catch (err) {
+        if (err.code === 'ER_NO_SUCH_TABLE') return res.json([]);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.post('/feedbacks', async (req, res) => {
+    try {
+        const { name, mobile, message } = req.body;
+        const [result] = await db.query(
+            'INSERT INTO feedbacks (name, mobile, message) VALUES (?, ?, ?)',
+            [name, mobile, message]
+        );
+        res.json({ id: result.insertId, message: 'Feedback submitted successfully' });
+    } catch (err) {
+        if (err.code === 'ER_NO_SUCH_TABLE') {
+            await db.query(`CREATE TABLE IF NOT EXISTS feedbacks (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(100) NOT NULL,
+                mobile VARCHAR(20),
+                message TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )`);
+            const { name, mobile, message } = req.body;
+            const [result] = await db.query(
+                'INSERT INTO feedbacks (name, mobile, message) VALUES (?, ?, ?)',
+                [name, mobile, message]
+            );
+            return res.json({ id: result.insertId, message: 'Feedback submitted successfully' });
+        }
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;

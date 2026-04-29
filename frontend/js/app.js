@@ -181,12 +181,24 @@ const app = {
         try {
             const scanner = await window.api.getSetting('scannerImage');
             const scannerImg = document.getElementById('scanner-qr-image');
+            const publicLink = document.getElementById('public-scanner-link');
             if(scanner && scanner.value && scannerImg) {
                 scannerImg.src = scanner.value;
+                if(publicLink) publicLink.href = scanner.value;
                 scannerImg.onerror = function() { 
                     this.src = 'images/qr.webp';
+                    if(publicLink) publicLink.href = 'images/qr.webp';
                     this.onerror = function() { this.src = 'https://via.placeholder.com/200?text=Scan+to+Pay'; };
                 };
+            }
+            
+            // Load UPI ID
+            const upiId = await window.api.getSetting('upiId');
+            if(upiId && upiId.value) {
+                const publicUpi = document.getElementById('public-upi-id');
+                const homeUpi = document.getElementById('home-upi-id');
+                if(publicUpi) publicUpi.value = upiId.value;
+                if(homeUpi) homeUpi.value = upiId.value;
             }
         } catch(err) {
             console.error(err);
@@ -392,6 +404,11 @@ const app = {
             document.getElementById('dash-collected').innerText = `₹ ${stats.totalCollected}`;
             document.getElementById('dash-expenses').innerText = `₹ ${stats.totalExpenses}`;
             document.getElementById('dash-balance').innerText = `₹ ${stats.remainingBalance}`;
+
+            const previous = await window.api.getPreviousDonations();
+            const prevTotal = previous.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
+            const prevEl = document.getElementById('dash-previous');
+            if (prevEl) prevEl.innerText = `₹ ${prevTotal}`;
 
             document.getElementById('admin-expenses-section').style.display = 'none';
 
@@ -636,8 +653,10 @@ const app = {
         try {
             const scanner = await window.api.getSetting('scannerImage');
             const img = document.getElementById('home-scanner-qr');
+            const link = document.getElementById('home-scanner-link');
             if(scanner && scanner.value && img) {
                 img.src = scanner.value;
+                if(link) link.href = scanner.value;
             }
         } catch(e) { console.error(e); }
     },
@@ -732,6 +751,48 @@ const app = {
         } catch(err) {
             alert('Error: ' + err.message);
         }
+    },
+
+    async submitFeedback() {
+        const name = document.getElementById('feedback-name').value;
+        const mobile = document.getElementById('feedback-mobile').value;
+        const message = document.getElementById('feedback-message').value;
+
+        if(!name || !message) return alert('कृपया नाव आणि संदेश भरा (Name and Message are required)');
+
+        try {
+            await window.api.addFeedback({ name, mobile, message });
+            alert('तुमचा अभिप्राय यशस्वीरित्या पाठवला आहे. धन्यवाद!');
+            document.getElementById('feedback-name').value = '';
+            document.getElementById('feedback-mobile').value = '';
+            document.getElementById('feedback-message').value = '';
+        } catch(err) {
+            alert('Error: ' + err.message);
+        }
+    },
+
+    copyUPI(elementId) {
+        const input = document.getElementById(elementId);
+        if(!input || input.value === 'Not available') return;
+        
+        // Select text
+        input.select();
+        input.setSelectionRange(0, 99999); // For mobile devices
+        
+        // Copy to clipboard
+        navigator.clipboard.writeText(input.value).then(() => {
+            // Optional: change button icon temporarily
+            alert('UPI ID Copied: ' + input.value);
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+            // Fallback for older browsers
+            try {
+                document.execCommand('copy');
+                alert('UPI ID Copied: ' + input.value);
+            } catch (e) {
+                alert('Failed to copy UPI ID.');
+            }
+        });
     }
 };
 
