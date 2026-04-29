@@ -167,6 +167,13 @@
                         </select>
                         <input type="text" id="admin-donor-name" placeholder="Donor Name">
                         <input type="number" id="admin-donor-amount" placeholder="Amount (₹)">
+                        <select id="admin-donor-mode" style="min-width: 100px;">
+                            <option value="Cash">Cash</option>
+                            <option value="Online">Online</option>
+                        </select>
+                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; white-space: nowrap; font-size: 0.9rem;">
+                            <input type="checkbox" id="admin-donor-paid" checked> Mark Paid
+                        </label>
                         <input type="text" id="admin-donor-event" placeholder="Event" value="बिरदेव जयंती २०२६">
                         <button class="btn btn-success" onclick="adminApp.addDonationDirectly()">
                             <i class="fa-solid fa-plus"></i> Add
@@ -190,7 +197,21 @@
                 <section id="view-pending" class="view-section">
                     <h2 class="section-title">Pending Approvals</h2>
                     <p style="margin-bottom: 1rem; color: var(--text-light);">Review pledges from the public site.</p>
-                    <div id="pending-list-container">
+
+                    <!-- Tabs for Cash / Online -->
+                    <div style="display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-color);">
+                        <button id="pending-tab-online" class="btn" onclick="adminApp.switchPendingTab('online')" style="flex: 1; border-radius: 8px 8px 0 0; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; font-weight: 700; padding: 0.8rem; border: none;">
+                            <i class="fa-solid fa-globe"></i> Online <span id="pending-online-count" style="background: rgba(255,255,255,0.3); padding: 0.1rem 0.5rem; border-radius: 10px; font-size: 0.8rem;">0</span>
+                        </button>
+                        <button id="pending-tab-cash" class="btn" onclick="adminApp.switchPendingTab('cash')" style="flex: 1; border-radius: 8px 8px 0 0; background: var(--bg-light); color: var(--text-dark); font-weight: 700; padding: 0.8rem; border: none; opacity: 0.7;">
+                            <i class="fa-solid fa-money-bill-wave"></i> Cash <span id="pending-cash-count" style="background: rgba(0,0,0,0.1); padding: 0.1rem 0.5rem; border-radius: 10px; font-size: 0.8rem;">0</span>
+                        </button>
+                    </div>
+
+                    <div id="pending-online-container">
+                        <!-- JS -->
+                    </div>
+                    <div id="pending-cash-container" style="display: none;">
                         <!-- JS -->
                     </div>
                 </section>

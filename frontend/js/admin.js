@@ -207,11 +207,23 @@ const adminApp = {
         const name = document.getElementById('admin-donor-name').value;
         const amount = document.getElementById('admin-donor-amount').value;
         const eventName = document.getElementById('admin-donor-event').value || 'बिरदेव जयंती २०२६';
+        const paymentMode = document.getElementById('admin-donor-mode').value;
+        const markPaid = document.getElementById('admin-donor-paid').checked;
 
         if(!surname || !name || !amount) return alert('Please fill surname, name, and amount.');
 
         try {
-            await window.api.addDonation({ name, amount, surnameCategory: surname, eventName });
+            // First create the donation
+            const result = await window.api.addDonation({ name, amount, surnameCategory: surname, eventName });
+            
+            // If mark as paid, immediately update it
+            if(markPaid && result.id) {
+                await window.api.updateDonation(result.id, {
+                    isPaid: true,
+                    paymentMode: paymentMode,
+                    date: new Date().toISOString().split('T')[0]
+                });
+            }
             
             // Clear inputs
             document.getElementById('admin-donor-name').value = '';
@@ -219,50 +231,117 @@ const adminApp = {
             
             this.filterDonations();
             
-            alert('Donation added! (Currently marked as Pending. Please click Mark Paid on the card below to finalize).');
+            alert(markPaid ? 'Donation added & marked as Paid!' : 'Donation added as Pending.');
         } catch(err) {
             alert(err.message);
         }
     },
 
     // --- PENDING ---
+    _pendingTab: 'online',
+
+    switchPendingTab(tab) {
+        this._pendingTab = tab;
+        const onlineContainer = document.getElementById('pending-online-container');
+        const cashContainer = document.getElementById('pending-cash-container');
+        const onlineTab = document.getElementById('pending-tab-online');
+        const cashTab = document.getElementById('pending-tab-cash');
+
+        if (tab === 'online') {
+            onlineContainer.style.display = 'block';
+            cashContainer.style.display = 'none';
+            onlineTab.style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
+            onlineTab.style.color = 'white';
+            onlineTab.style.opacity = '1';
+            cashTab.style.background = 'var(--bg-light)';
+            cashTab.style.color = 'var(--text-dark)';
+            cashTab.style.opacity = '0.7';
+        } else {
+            onlineContainer.style.display = 'none';
+            cashContainer.style.display = 'block';
+            cashTab.style.background = 'linear-gradient(135deg, #16a34a, #15803d)';
+            cashTab.style.color = 'white';
+            cashTab.style.opacity = '1';
+            onlineTab.style.background = 'var(--bg-light)';
+            onlineTab.style.color = 'var(--text-dark)';
+            onlineTab.style.opacity = '0.7';
+        }
+    },
+
     async loadPending() {
-        const container = document.getElementById('pending-list-container');
-        container.innerHTML = '<div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
+        const onlineContainer = document.getElementById('pending-online-container');
+        const cashContainer = document.getElementById('pending-cash-container');
+        onlineContainer.innerHTML = '<div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
+        cashContainer.innerHTML = '';
+
         try {
             const donations = await window.api.getDonations();
             const pending = donations.filter(d => !d.isPaid);
-            if(pending.length === 0) {
-                container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-check-circle" style="font-size: 3rem; color: var(--success-color); margin-bottom: 1rem;"></i><p>No pending approvals. All good!</p></div>';
-                return;
+
+            const onlinePending = pending.filter(d => d.screenshot_url);
+            const cashPending = pending.filter(d => !d.screenshot_url);
+
+            // Update counts
+            document.getElementById('pending-online-count').innerText = onlinePending.length;
+            document.getElementById('pending-cash-count').innerText = cashPending.length;
+
+            // Render Online pending
+            if(onlinePending.length === 0) {
+                onlineContainer.innerHTML = '<div class="empty-state"><i class="fa-solid fa-check-circle" style="font-size: 2rem; color: var(--success-color); margin-bottom: 0.5rem;"></i><p>No online pending approvals.</p></div>';
+            } else {
+                onlineContainer.innerHTML = onlinePending.map(d => `
+                    <div class="donor-card unpaid" style="cursor: pointer;" onclick="this.classList.toggle('expanded')">
+                        <div class="donor-card-header">
+                            <div class="donor-info">
+                                <h4>${d.name} <span style="font-size: 0.8rem; color: #718096;">(${d.surnameCategory}) - ₹ ${d.amount}</span></h4>
+                                <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.2rem;">Event: ${d.eventName}</p>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                                <span class="status-badge paid" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white;">Online</span>
+                                <span style="font-size: 0.75rem; color: var(--text-light);"><i class="fa-solid fa-chevron-down"></i> Screenshot</span>
+                            </div>
+                        </div>
+                        ${d.screenshot_url ? `
+                        <div class="donor-details" onclick="event.stopPropagation()" style="margin-top: 1rem; padding: 1rem; background: rgba(59,130,246,0.05); border-radius: 8px;">
+                            <p style="font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem; color: #3b82f6;"><i class="fa-solid fa-image"></i> Payment Screenshot:</p>
+                            <a href="${d.screenshot_url}" target="_blank">
+                                <img src="${d.screenshot_url}" alt="Screenshot" style="max-width: 100%; max-height: 250px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                            </a>
+                        </div>
+                        ` : ''}
+                        <div class="donor-details" onclick="event.stopPropagation()" style="border-top: 1px dashed #ccc; padding-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                            <button class="btn btn-success" onclick="adminApp.markPaid(${d.id}, 'Online')"><i class="fa-solid fa-check"></i> Approve (Online)</button>
+                            <button class="btn btn-danger" onclick="adminApp.deleteDonation(${d.id})"><i class="fa-solid fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                `).join('');
             }
-            container.innerHTML = pending.map(d => `
-                <div class="donor-card unpaid">
-                    <div class="donor-info">
-                        <h4>${d.name} <span style="font-size: 0.8rem; color: #718096;">(${d.surnameCategory}) - ₹ ${d.amount}</span></h4>
-                        <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.2rem;">Event: ${d.eventName}</p>
-                        ${d.screenshot_url ? `<span class="status-badge paid" style="background: var(--primary-color); margin-top: 0.5rem; display: inline-block;">Online Payment</span>` : ''}
+
+            // Render Cash pending
+            if(cashPending.length === 0) {
+                cashContainer.innerHTML = '<div class="empty-state"><i class="fa-solid fa-check-circle" style="font-size: 2rem; color: var(--success-color); margin-bottom: 0.5rem;"></i><p>No cash pending approvals.</p></div>';
+            } else {
+                cashContainer.innerHTML = cashPending.map(d => `
+                    <div class="donor-card unpaid">
+                        <div class="donor-card-header">
+                            <div class="donor-info">
+                                <h4>${d.name} <span style="font-size: 0.8rem; color: #718096;">(${d.surnameCategory}) - ₹ ${d.amount}</span></h4>
+                                <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.2rem;">Event: ${d.eventName}</p>
+                            </div>
+                            <span class="status-badge" style="background: #dcfce7; color: #16a34a;">Cash</span>
+                        </div>
+                        <div style="margin-top: 1rem; border-top: 1px dashed #ccc; padding-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                            <button class="btn btn-success" onclick="adminApp.markPaid(${d.id}, 'Cash')"><i class="fa-solid fa-check"></i> Approve (Cash)</button>
+                            <button class="btn btn-danger" onclick="adminApp.deleteDonation(${d.id})"><i class="fa-solid fa-trash"></i> Delete</button>
+                        </div>
                     </div>
-                    ${d.screenshot_url ? `
-                    <div style="margin-top: 1rem; padding: 1rem; background: rgba(0,0,0,0.02); border-radius: 8px;">
-                        <p style="font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem;"><i class="fa-solid fa-image"></i> Payment Screenshot:</p>
-                        <a href="${d.screenshot_url}" target="_blank">
-                            <img src="${d.screenshot_url}" alt="Screenshot" style="max-width: 100%; max-height: 200px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                        </a>
-                    </div>
-                    ` : ''}
-                    <div class="admin-actions-cell" style="display:flex; gap:0.5rem; margin-top: 1rem; flex-wrap: wrap; align-items: center;">
-                        <select id="pending-mode-${d.id}" style="padding: 0.4rem; border-radius: 4px; border: 1px solid #ccc; font-size: 0.9rem;">
-                            <option value="Cash" ${!d.screenshot_url ? 'selected' : ''}>Cash</option>
-                            <option value="Online" ${d.screenshot_url ? 'selected' : ''}>Online</option>
-                        </select>
-                        <button class="btn btn-success" onclick="adminApp.markPaid(${d.id}, document.getElementById('pending-mode-${d.id}').value)">Approve (Mark Paid)</button>
-                        <button class="btn btn-danger" onclick="adminApp.deleteDonation(${d.id})">Delete</button>
-                    </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
+
+            // Restore active tab
+            this.switchPendingTab(this._pendingTab);
         } catch(err) {
-            container.innerHTML = '<p style="color: var(--danger-color);">Error loading records.</p>';
+            onlineContainer.innerHTML = '<p style="color: var(--danger-color);">Error loading records.</p>';
         }
     },
 
