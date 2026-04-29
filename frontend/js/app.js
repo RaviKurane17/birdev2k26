@@ -964,7 +964,7 @@ const app = {
         // === SHREE RAM WATERMARK (Center Background) ===
         if (ramImg) {
             ctx.save();
-            ctx.globalAlpha = 0.08; // Very subtle
+            ctx.globalAlpha = 0.15; // Increased visibility but still transparent
             const ramW = 350;
             const ramH = (ramImg.height / ramImg.width) * ramW;
             ctx.drawImage(ramImg, (W - ramW) / 2, (H - ramH) / 2 + 50, ramW, ramH);
@@ -1011,7 +1011,7 @@ const app = {
         ctx.fillText('BIRDEV JAYANTI', W / 2 - 55, 58);
         ctx.fillStyle = '#5a3e1b';
         ctx.font = '10px sans-serif';
-        ctx.fillText('Birdev Jayanti Utsav Samiti', W / 2 - 55, 74);
+        ctx.fillText('Birdev Jayanti Utsav Samiti 2026', W / 2 - 55, 74);
         ctx.fillText('birdev2k26.vercel.app', W / 2 - 55, 87);
 
         // Right text block
@@ -1221,7 +1221,8 @@ const app = {
 
     shareWhatsApp() {
         const name = this._receiptName || 'Donor';
-        const message = `🏛️ *बिरदेव जयंती उत्सव समिती 2K26*\n\n✅ *देणगी पावती (Donation Receipt)*\n\n👤 नाव: *${name}*\n💰📅 तारीख: ${new Date().toLocaleDateString('en-IN')}\n\n✨ देणगी यशस्वीरित्या जमा झाली!\n🌐 Website: birdev2k26.vercel.ap`;
+        const amount = this._receiptAmount || '';
+        const message = `🏛️ *बिरदेव जयंती उत्सव समिती 2K26*\n\n✅ *देणगी पावती (Donation Receipt)*\n\n👤 नाव: *${name}*\n💰 रक्कम: *₹ ${amount}*\n📅 तारीख: ${new Date().toLocaleDateString('en-IN')}\n\n✨ देणगी यशस्वीरित्या जमा झाली!\n🌐 Website: birdev2k26.vercel.app\n @Ravi Kurane♦️`;
 
         const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
         window.open(url, '_blank');
