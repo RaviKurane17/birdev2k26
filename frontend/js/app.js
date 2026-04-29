@@ -900,33 +900,37 @@ const app = {
         }, 300);
     },
 
-    // --- PREMIUM DIGITAL RECEIPT GENERATOR (with God Image) ---
+    // --- PREMIUM DIGITAL RECEIPT GENERATOR (with God Image & Watermark) ---
     generateReceipt(name, amount, date, surname, paymentMode) {
         // Show loading state
         this.showReceiptModal(null, name, amount);
-        document.getElementById('receipt-canvas-wrapper').innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fa-solid fa-spinner fa-spin" style="font-size:2rem;color:#d69e2e;"></i><p style="margin-top:0.5rem;color:#718096;">Generating receipt...</p></div>';
+        const wrapper = document.getElementById('receipt-canvas-wrapper');
+        if (wrapper) wrapper.innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fa-solid fa-spinner fa-spin" style="font-size:2rem;color:#d69e2e;"></i><p style="margin-top:0.5rem;color:#718096;">Generating premium receipt...</p></div>';
 
-        const godImg = new Image();
-        godImg.crossOrigin = 'anonymous';
-        godImg.src = 'images/murshidheshwargod.png';
-
-        godImg.onload = () => {
-            const canvas = this._drawReceipt(godImg, name, amount, date, surname, paymentMode);
-            document.getElementById('receipt-canvas-wrapper').innerHTML = '';
-            document.getElementById('receipt-canvas-wrapper').appendChild(canvas);
-            this._receiptCanvas = canvas;
+        const loadImage = (src) => {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.src = src;
+                img.onload = () => resolve(img);
+                img.onerror = () => resolve(null);
+            });
         };
 
-        godImg.onerror = () => {
-            // If image fails, draw without it
-            const canvas = this._drawReceipt(null, name, amount, date, surname, paymentMode);
-            document.getElementById('receipt-canvas-wrapper').innerHTML = '';
-            document.getElementById('receipt-canvas-wrapper').appendChild(canvas);
+        Promise.all([
+            loadImage('images/murshidheshwargod.png'),
+            loadImage('images/shreeram.png')
+        ]).then(([godImg, ramImg]) => {
+            const canvas = this._drawReceipt(godImg, name, amount, date, surname, paymentMode, ramImg);
+            if (wrapper) {
+                wrapper.innerHTML = '';
+                wrapper.appendChild(canvas);
+            }
             this._receiptCanvas = canvas;
-        };
+        });
     },
 
-    _drawReceipt(godImg, name, amount, date, surname, paymentMode) {
+    _drawReceipt(godImg, name, amount, date, surname, paymentMode, ramImg) {
         const canvas = document.createElement('canvas');
         const W = 600, H = 780;
         canvas.width = W;
@@ -956,6 +960,16 @@ const app = {
         bgGrad.addColorStop(1, '#f5e6c8');
         ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, W, H);
+
+        // === SHREE RAM WATERMARK (Center Background) ===
+        if (ramImg) {
+            ctx.save();
+            ctx.globalAlpha = 0.08; // Very subtle
+            const ramW = 350;
+            const ramH = (ramImg.height / ramImg.width) * ramW;
+            ctx.drawImage(ramImg, (W - ramW) / 2, (H - ramH) / 2 + 50, ramW, ramH);
+            ctx.restore();
+        }
 
         // === OUTER DECORATIVE BORDER ===
         ctx.strokeStyle = '#c8a23c';
@@ -1207,8 +1221,7 @@ const app = {
 
     shareWhatsApp() {
         const name = this._receiptName || 'Donor';
-        const amount = this._receiptAmount || '';
-        const message = `🏛️ *बिरदेव जयंती उत्सव समिती 2K26*\n\n✅ *देणगी पावती (Donation Receipt)*\n\n👤 नाव: *${name}*\n💰 रक्कम: *₹ ${amount}*\n📅 तारीख: ${new Date().toLocaleDateString('en-IN')}\n\n✨ देणगी यशस्वीरित्या जमा झाली!\n🌐 Website: birdev2k26.vercel.app\n @Ravi Kurane♦️`;
+        const message = `🏛️ *बिरदेव जयंती उत्सव समिती 2K26*\n\n✅ *देणगी पावती (Donation Receipt)*\n\n👤 नाव: *${name}*\n💰📅 तारीख: ${new Date().toLocaleDateString('en-IN')}\n\n✨ देणगी यशस्वीरित्या जमा झाली!\n🌐 Website: birdev2k26.vercel.ap`;
 
         const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
         window.open(url, '_blank');
