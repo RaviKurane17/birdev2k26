@@ -445,4 +445,13 @@ router.post('/feedbacks', async (req, res) => {
     }
 });
 
+router.delete('/feedbacks/:id', verifyToken, async (req, res) => {
+    try {
+        await db.query('DELETE FROM feedbacks WHERE id = ?', [req.params.id]);
+        res.json({ message: 'Feedback deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;
