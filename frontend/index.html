@@ -140,6 +140,13 @@
                                 <h3 id="home-total-collected-large">₹ 0</h3>
                             </div>
                         </div>
+                        <div class="goal-card" style="background: linear-gradient(135deg, #8e2de2, #4a00e0); color: white;">
+                            <div class="goal-icon" style="background: rgba(255,255,255,0.2); color: white;"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                            <div class="goal-text">
+                                <p style="color: rgba(255,255,255,0.8);">मागील शिल्लक</p>
+                                <h3 id="home-previous-balance" style="color: white;">₹ 0</h3>
+                            </div>
+                        </div>
                         <div class="goal-card">
                             <div class="goal-icon target"><i class="fa-solid fa-bullseye"></i></div>
                             <div class="goal-text">
@@ -284,21 +291,29 @@
                             <!-- Populated via JS -->
                         </div>
                         
-                        <div class="feedback-section" style="margin-top: 3rem; background: var(--bg-light); padding: 2rem; border-radius: var(--radius); border: 1px solid var(--border-color);">
-                            <h2 class="section-title" style="margin-bottom: 1rem;"><i class="fa-solid fa-comment-dots"></i> अभिप्राय / सूचना (Feedback)</h2>
-                            <p style="margin-bottom: 1.5rem; color: var(--text-light); text-align: center;">आपल्या काही सूचना, प्रश्न किंवा अभिप्राय असतील तर खालील फॉर्म भरा.</p>
-                            <div class="form-group">
-                                <input type="text" id="feedback-name" placeholder="तुमचे नाव (Your Name)" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: var(--radius); margin-bottom: 1rem;">
-                            </div>
-                            <div class="form-group">
-                                <input type="text" id="feedback-mobile" placeholder="मोबाईल नंबर (Mobile Number)" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: var(--radius); margin-bottom: 1rem;">
-                            </div>
-                            <div class="form-group">
-                                <textarea id="feedback-message" placeholder="तुमचा संदेश (Your Message)" rows="4" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: var(--radius); margin-bottom: 1rem;"></textarea>
-                            </div>
-                            <button class="btn btn-primary" style="width: 100%; padding: 0.8rem;" onclick="app.submitFeedback()">
-                                <i class="fa-solid fa-paper-plane"></i> पाठवा (Submit)
+                        <div class="feedback-toggle-container" style="text-align: center; margin-top: 3rem;">
+                            <button id="feedback-toggle-btn" onclick="app.toggleFeedbackForm()" class="btn-animated-expand special-btn" style="background: linear-gradient(135deg, #06b6d4, #3b82f6); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); border: none; color: white; border-radius: 30px; padding: 0.8rem 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; transition: transform 0.3s ease;">
+                                <i class="fa-solid fa-wand-magic-sparkles fa-bounce"></i> अभिप्राय / सूचना द्या (Feedback)
                             </button>
+                        </div>
+
+                        <div id="feedback-form-container" class="feedback-section collapsable-container" style="margin-top: 1.5rem; display: none;">
+                            <div style="background: var(--bg-light); padding: 2rem; border-radius: var(--radius); border: 1px solid var(--border-color); animation: fadeIn 0.5s ease;">
+                                <h2 class="section-title" style="margin-bottom: 1rem; color: var(--primary-dark);"><i class="fa-solid fa-comment-dots"></i> अभिप्राय / सूचना (Feedback)</h2>
+                                <p style="margin-bottom: 1.5rem; color: var(--text-light); text-align: center;">आपल्या काही सूचना, प्रश्न किंवा अभिप्राय असतील तर खालील फॉर्म भरा.</p>
+                                <div class="form-group">
+                                    <input type="text" id="feedback-name" placeholder="तुमचे नाव (Your Name)" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: var(--radius); margin-bottom: 1rem;">
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" id="feedback-mobile" placeholder="मोबाईल नंबर (Mobile Number)" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: var(--radius); margin-bottom: 1rem;">
+                                </div>
+                                <div class="form-group">
+                                    <textarea id="feedback-message" placeholder="तुमचा संदेश (Your Message)" rows="4" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: var(--radius); margin-bottom: 1rem;"></textarea>
+                                </div>
+                                <button class="btn btn-primary" style="width: 100%; padding: 0.8rem; background: linear-gradient(135deg, #06b6d4, #3b82f6); border: none;" onclick="app.submitFeedback()">
+                                    <i class="fa-solid fa-paper-plane"></i> पाठवा (Submit)
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </section>

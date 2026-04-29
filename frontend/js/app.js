@@ -239,6 +239,12 @@ const app = {
             document.getElementById('home-total-people').innerText = totalPeople;
             document.getElementById('home-paid-people').innerText = paidPeople;
             document.getElementById('home-unpaid-people').innerText = unpaidPeople;
+
+            // Load Previous Balance for Home
+            const previous = await window.api.getPreviousDonations();
+            const prevTotal = previous.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
+            const prevElHome = document.getElementById('home-previous-balance');
+            if (prevElHome) prevElHome.innerText = `₹ ${prevTotal}`;
         } catch (err) {
             console.error('Error loading home data:', err);
         }
@@ -750,6 +756,21 @@ const app = {
             this.toggleSpecialDonate();
         } catch(err) {
             alert('Error: ' + err.message);
+        }
+    },
+
+    toggleFeedbackForm() {
+        const formContainer = document.getElementById('feedback-form-container');
+        const toggleBtn = document.getElementById('feedback-toggle-btn');
+        if (formContainer.style.display === 'none' || !formContainer.style.display) {
+            formContainer.style.display = 'block';
+            toggleBtn.classList.add('active');
+            toggleBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> अभिप्राय / सूचना बंद करा';
+            setTimeout(() => formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+        } else {
+            formContainer.style.display = 'none';
+            toggleBtn.classList.remove('active');
+            toggleBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles fa-bounce"></i> अभिप्राय / सूचना द्या (Feedback)';
         }
     },
 
