@@ -1,0 +1,28 @@
+{
+  "name": "बिरदेव जयंती देणगी व्यवस्थापन",
+  "short_name": "Birdev 2K26",
+  "description": "Birdev Jayanti Utsav Samiti - Community Donation Management System",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fdf6e3",
+  "theme_color": "#d4af37",
+  "orientation": "portrait-primary",
+  "lang": "mr",
+  "icons": [
+    {
+      "src": "images/murshidheshwargod.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/murshidheshwargod.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "social"],
+  "screenshots": []
+}

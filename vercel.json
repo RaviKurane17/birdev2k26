@@ -12,6 +12,8 @@
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/index.js" },
+    { "src": "/sw.js", "dest": "/frontend/sw.js" },
+    { "src": "/manifest.json", "dest": "/frontend/manifest.json" },
     { "src": "/(.*)", "dest": "/frontend/$1" }
   ]
 }
