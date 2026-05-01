@@ -678,9 +678,12 @@ const app = {
     },
 
     async payViaUPI(amountId, nameId) {
-        const amount = document.getElementById(amountId).value;
-        const name = document.getElementById(nameId).value;
-        if (!amount || amount <= 0) return alert('कृपया रक्कम भरा (Please enter an amount first)');
+        const amountInput = document.getElementById(amountId).value;
+        const amount = amountInput ? amountInput.trim() : '';
+
+        if (!amount || isNaN(amount) || amount <= 0) {
+            return alert('कृपया योग्य रक्कम भरा (Please enter a valid amount)');
+        }
 
         try {
             const upiIdSetting = await window.api.getSetting('upiId');
@@ -689,17 +692,14 @@ const app = {
             }
 
             const upiId = upiIdSetting.value;
-            // The Payee Name MUST exactly match the name registered with the bank for this UPI ID.
-            // A mismatch will cause the bank to reject the transaction after TPIN is entered.
-            const payeeName = "Mahesh Hukkeri"; 
+            const payeeName = "Mahesh Hukkeri";
 
-            // Format amount safely
-            const formattedAmount = parseFloat(amount).toFixed(2);
+            const formattedAmount = parseInt(amount, 10);
 
-            // Construct the most minimal UPI intent link possible to mimic a physical QR scan perfectly.
-            const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${formattedAmount}&cu=INR`;
+            const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&tn=Donation&am=${formattedAmount}&cu=INR`;
 
-            // Open link (triggers UPI app selection on mobile)
+            console.log("UPI Link Generated:", upiLink);
+
             window.location.href = upiLink;
         } catch (err) {
             console.error(err);
