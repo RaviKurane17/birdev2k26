@@ -300,7 +300,6 @@ const adminApp = {
 
     // --- PENDING ---
     _pendingTab: 'online',
-    _rawPendingData: null,
 
     switchPendingTab(tab) {
         this._pendingTab = tab;
@@ -330,33 +329,25 @@ const adminApp = {
         }
     },
 
-    async loadPending(forceFetch = false) {
+    async loadPending() {
         const onlineContainer = document.getElementById('pending-online-container');
         const cashContainer = document.getElementById('pending-cash-container');
-        
-        if (forceFetch || !this._rawPendingData) {
-            onlineContainer.innerHTML = '<div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
-            cashContainer.innerHTML = '';
-            try {
-                const donations = await window.api.getDonations();
-                this._rawPendingData = donations.filter(d => !d.isPaid);
-            } catch (err) {
-                onlineContainer.innerHTML = '<p style="color: red;">Failed to load data.</p>';
-                return;
+        onlineContainer.innerHTML = '<div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
+        cashContainer.innerHTML = '';
+
+        try {
+            const donations = await window.api.getDonations();
+            let pending = donations.filter(d => !d.isPaid);
+
+            // Filter by search input
+            const searchInput = document.getElementById('pending-search-input');
+            if (searchInput && searchInput.value.trim() !== '') {
+                const query = searchInput.value.trim().toLowerCase();
+                pending = pending.filter(d => 
+                    (d.name && d.name.toLowerCase().includes(query)) || 
+                    (d.surnameCategory && d.surnameCategory.toLowerCase().includes(query))
+                );
             }
-        }
-
-        let pending = [...this._rawPendingData];
-
-        // Apply search filter if query exists
-        const searchInput = document.getElementById('pending-search');
-        if (searchInput && searchInput.value.trim() !== '') {
-            const query = searchInput.value.trim().toLowerCase();
-            pending = pending.filter(d => 
-                (d.name && d.name.toLowerCase().includes(query)) || 
-                (d.surnameCategory && d.surnameCategory.toLowerCase().includes(query))
-            );
-        }
 
             // Split: Online = has screenshot OR paymentMode is 'Online'
             const onlinePending = pending.filter(d => d.screenshot_url || d.paymentMode === 'Online');
@@ -444,7 +435,7 @@ const adminApp = {
             });
             // Reload whatever view is active
             if(document.getElementById('view-donations').classList.contains('active')) this.filterDonations();
-            if(document.getElementById('view-pending').classList.contains('active')) this.loadPending(true);
+            if(document.getElementById('view-pending').classList.contains('active')) this.loadPending();
         } catch(err) {
             alert('Error updating: ' + err.message);
         }
@@ -455,7 +446,7 @@ const adminApp = {
         try {
             await window.api.deleteDonation(id);
             if(document.getElementById('view-donations').classList.contains('active')) this.filterDonations();
-            if(document.getElementById('view-pending').classList.contains('active')) this.loadPending(true);
+            if(document.getElementById('view-pending').classList.contains('active')) this.loadPending();
         } catch(err) {
             alert('Error deleting: ' + err.message);
         }

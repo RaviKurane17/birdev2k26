@@ -197,10 +197,6 @@
                 <section id="view-pending" class="view-section">
                     <h2 class="section-title">Pending Approvals</h2>
                     <p style="margin-bottom: 1rem; color: var(--text-light);">Review pledges from the public site.</p>
-                    
-                    <div style="margin-bottom: 1.5rem;">
-                        <input type="text" id="pending-search" placeholder="🔍 Search Name or Surname..." oninput="adminApp.loadPending()" style="width: 100%; padding: 0.8rem 1rem; border-radius: 8px; border: 1px solid var(--border-color); font-size: 1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.05); transition: border 0.3s;" onfocus="this.style.borderColor='var(--primary-color)'" onblur="this.style.borderColor='var(--border-color)'">
-                    </div>
 
                     <!-- Tabs for Cash / Online -->
                     <div style="display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-color);">
@@ -210,6 +206,11 @@
                         <button id="pending-tab-cash" class="btn" onclick="adminApp.switchPendingTab('cash')" style="flex: 1; border-radius: 8px 8px 0 0; background: var(--bg-light); color: var(--text-dark); font-weight: 700; padding: 0.8rem; border: none; opacity: 0.7;">
                             <i class="fa-solid fa-money-bill-wave"></i> Cash <span id="pending-cash-count" style="background: rgba(0,0,0,0.1); padding: 0.1rem 0.5rem; border-radius: 10px; font-size: 0.8rem;">0</span>
                         </button>
+                    </div>
+                    <!-- Search Bar -->
+                    <div style="margin-bottom: 1.5rem; position: relative;">
+                        <input type="text" id="pending-search-input" placeholder="नाव किंवा आडनाव शोधा (Search name/surname)..." style="width: 100%; padding: 0.8rem 1rem 0.8rem 2.5rem; border: 1px solid var(--border-color); border-radius: var(--radius); font-size: 1rem;" onkeyup="adminApp.loadPending()">
+                        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-light);"></i>
                     </div>
 
                     <div id="pending-online-container">
