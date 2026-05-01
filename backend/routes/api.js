@@ -229,26 +229,26 @@ router.get('/stats', async (req, res) => {
         let totalPrevious = 0;
         try {
             const [previous] = await db.query('SELECT SUM(amount) as totalPrevious FROM previous_donations');
-            totalPrevious = previous[0].totalPrevious || 0;
+            totalPrevious = parseFloat(previous[0].totalPrevious) || 0;
         } catch (e) { /* Ignore if table not exists yet */ }
 
         // Include Approved Special Donors in collection
         let totalSpecial = 0;
         try {
             const [special] = await db.query('SELECT SUM(amount) as totalSpecial FROM special_donors WHERE isApproved = true OR isApproved IS NULL');
-            totalSpecial = special[0].totalSpecial || 0;
+            totalSpecial = parseFloat(special[0].totalSpecial) || 0;
         } catch (e) { /* Ignore if table not exists yet */ }
 
-        const baseCollected = donations[0].totalCollected || 0;
+        const baseCollected = parseFloat(donations[0].totalCollected) || 0;
         const totalCollected = baseCollected + totalSpecial;
-        const totalPending = pending[0].totalPending || 0;
-        const totalExpenses = expenses[0].totalExpenses || 0;
+        const totalPending = parseFloat(pending[0].totalPending) || 0;
+        const totalExpenses = parseFloat(expenses[0].totalExpenses) || 0;
 
         res.json({
-            totalCollected,
-            totalPending,
-            totalExpenses,
-            remainingBalance: (totalCollected + totalPrevious) - totalExpenses
+            totalCollected: totalCollected.toFixed(2),
+            totalPending: totalPending.toFixed(2),
+            totalExpenses: totalExpenses.toFixed(2),
+            remainingBalance: ((totalCollected + totalPrevious) - totalExpenses).toFixed(2)
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

@@ -692,8 +692,11 @@ const app = {
             const payeeName = "Birdev Jayanti"; // Can be dynamic
             const transactionNote = name ? `Donation by ${name}` : 'Donation';
 
+            // Ensure amount is strictly formatted to 2 decimals for UPI compatibility
+            const formattedAmount = parseFloat(amount).toFixed(2);
+
             // Construct UPI intent link
-            const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(transactionNote)}`;
+            const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${formattedAmount}&cu=INR&tn=${encodeURIComponent(transactionNote)}`;
 
             // Open link (triggers UPI app selection on mobile)
             window.location.href = upiLink;
@@ -966,7 +969,7 @@ const app = {
             ctx.save();
             ctx.globalAlpha = 0.10; // Slightly more subtle for premium look
             ctx.globalCompositeOperation = 'multiply';
-            const ramW = 560; 
+            const ramW = 560;
             const ramH = (ramImg.height / ramImg.width) * ramW;
             // Perfectly centered horizontally, positioned below header
             ctx.drawImage(ramImg, (W - ramW) / 2, 150, ramW, ramH);
