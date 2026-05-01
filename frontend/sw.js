@@ -1,5 +1,5 @@
 // Birdev Jayanti 2K26 - Service Worker
-const CACHE_NAME = 'birdev-2k26-v1';
+const CACHE_NAME = 'birdev-2k26-v2';
 
 // Core files to cache for offline use
 const STATIC_CACHE = [
