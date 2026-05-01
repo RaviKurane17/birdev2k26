@@ -458,7 +458,7 @@ const adminApp = {
         const grid = document.getElementById('admin-surnames-grid');
         if(grid) {
             grid.innerHTML = surnamesList.map((s, index) => 
-                `<div class="surname-btn" style="cursor: default; position: relative;">
+                `<div class="surname-btn" style="cursor: pointer; position: relative; transition: all 0.2s; background: white;" onmouseover="this.style.background='#fffbee'" onmouseout="this.style.background='white'" onclick="adminApp.openSurnameDonations('${s.name.replace(/'/g, "\\'")}')">
                     <span>${index + 1}. ${s.name}</span>
                 </div>`
             ).join('');
@@ -474,6 +474,28 @@ const adminApp = {
                 </td>
             </tr>
         `).join('');
+    },
+
+    openSurnameDonations(surname) {
+        // Switch view to Manage Donations
+        this.showView('donations');
+        
+        // Update sidebar active state visually
+        document.querySelectorAll('.sidebar-nav li').forEach(li => li.classList.remove('active'));
+        const navItem = document.querySelector(`.sidebar-nav li[data-view="donations"]`);
+        if (navItem) navItem.classList.add('active');
+        
+        // Set the filter dropdown and load
+        const filterDropdown = document.getElementById('filter-surname');
+        if (filterDropdown) {
+            filterDropdown.value = surname;
+        }
+        
+        // Scroll to top to ensure visibility
+        window.scrollTo(0, 0);
+        
+        // Load the filtered list
+        this.filterDonations();
     },
 
     async addSurname() {
