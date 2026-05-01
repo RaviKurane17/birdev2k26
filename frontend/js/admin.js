@@ -156,7 +156,7 @@ const adminApp = {
             let donations = await window.api.getDonations();
             
             if(filter !== 'ALL') {
-                donations = donations.filter(d => d.surnameCategory === filter);
+                donations = donations.filter(d => (d.surnameCategory || '').trim() === (filter || '').trim());
             }
             
             donations.sort((a,b) => b.id - a.id);

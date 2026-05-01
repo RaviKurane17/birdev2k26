@@ -338,7 +338,7 @@ const app = {
         container.innerHTML = '<div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
         try {
             const donations = await window.api.getDonations();
-            const filtered = donations.filter(d => d.surnameCategory === surname);
+            const filtered = donations.filter(d => (d.surnameCategory || '').trim() === (surname || '').trim());
 
             // Sort: Paid first, then unpaid
             filtered.sort((a, b) => b.isPaid - a.isPaid);
