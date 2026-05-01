@@ -221,11 +221,14 @@
                             <!-- Scanner / QR Section -->
                             <div class="donate-panel-scanner">
                                 <h3><i class="fa-solid fa-qrcode"></i> स्कॅन करा आणि पेमेंट करा</h3>
-                                <div class="donate-panel-qr">
+                                <div class="donate-panel-qr" style="display: flex; flex-direction: column; align-items: center;">
                                     <a id="home-scanner-link" href="images/qr.webp" download="Birdev_Scanner_QR.png" title="Download Scanner">
                                         <img id="home-scanner-qr" src="images/qr.webp" alt="QR Code / Scanner"
                                             onerror="this.src='https://via.placeholder.com/200?text=Scan+to+Pay'">
                                     </a>
+                                    <button class="btn" style="background: var(--primary-color); color: var(--text-dark); margin-top: 0.5rem; padding: 0.4rem 1rem; border-radius: 50px; font-size: 0.85rem; font-weight: 600;" onclick="document.getElementById('home-scanner-link').click()">
+                                        <i class="fa-solid fa-download"></i> Download QR Code
+                                    </button>
                                 </div>
                                 <div class="upi-id-display" style="margin-top: 1rem; background: rgba(0,0,0,0.02); padding: 0.8rem; border-radius: var(--radius); border: 1px dashed var(--primary-color);">
                                     <p style="margin-bottom: 0.3rem; font-size: 0.8rem; font-weight: 600;">UPI ID:</p>
@@ -254,13 +257,7 @@
                                     <label>रक्कम (Amount ₹)</label>
                                     <input type="number" id="home-donate-amount" placeholder="₹">
                                 </div>
-                                <!--
-                                <div style="margin-bottom: 1rem;">
-                                    <button class="btn full-width" style="background: linear-gradient(135deg, #16a34a, #15803d); color: white; border: none; padding: 0.8rem; border-radius: var(--radius); display: flex; justify-content: center; align-items: center; gap: 0.5rem; font-weight: 600;" onclick="app.payViaUPI('home-donate-amount', 'home-donate-name')">
-                                        <i class="fa-solid fa-mobile-screen-button"></i> Pay Directly via UPI App
-                                    </button>
-                                </div>
-                                -->
+
                                 <div class="form-group">
                                     <label>पेमेंट स्क्रीनशॉट (Payment Screenshot)</label>
                                     <div class="screenshot-upload-area" id="screenshot-upload-area" onclick="document.getElementById('home-donate-screenshot').click()">
@@ -438,12 +435,15 @@
                     <div class="donate-container" style="display: flex; gap: 2rem; flex-wrap: wrap;">
                         <div class="qr-card" style="flex: 1; min-width: 280px;">
                             <h3>ऑनलाईन देणगी भरण्यासाठी स्कॅन करा</h3>
-                            <div class="qr-placeholder" id="scanner-qr-container">
+                            <div class="qr-placeholder" id="scanner-qr-container" style="display: flex; flex-direction: column; align-items: center;">
                                 <!-- Scanner image from admin or fallback -->
                                 <a id="public-scanner-link" href="images/qr.webp" download="Birdev_Scanner_QR.png" title="Download Scanner">
                                     <img id="scanner-qr-image" src="images/qr.webp" alt="QR Code / Scanner"
                                         onerror="this.src='https://via.placeholder.com/200?text=Scan+to+Pay'">
                                 </a>
+                                <button class="btn" style="background: var(--primary-color); color: var(--text-dark); margin-top: 0.5rem; padding: 0.4rem 1rem; border-radius: 50px; font-size: 0.85rem; font-weight: 600;" onclick="document.getElementById('public-scanner-link').click()">
+                                    <i class="fa-solid fa-download"></i> Download QR Code
+                                </button>
                             </div>
                             <div class="upi-id-display" style="margin-top: 1rem; background: var(--bg-light); padding: 1rem; border-radius: var(--radius); border: 1px dashed var(--primary-color);">
                                 <p style="margin-bottom: 0.5rem; color: var(--text-dark); font-weight: 600;">UPI ID:</p>
@@ -466,13 +466,7 @@
                                 <label>रक्कम (Amount)</label>
                                 <input type="number" id="public-donor-amount" required>
                             </div>
-                            <!--
-                            <div style="margin-bottom: 1rem;">
-                                <button class="btn full-width" style="background: linear-gradient(135deg, #16a34a, #15803d); color: white; border: none; padding: 0.8rem; border-radius: var(--radius); display: flex; justify-content: center; align-items: center; gap: 0.5rem; font-weight: 600;" onclick="app.payViaUPI('public-donor-amount', 'public-donor-name')">
-                                    <i class="fa-solid fa-mobile-screen-button"></i> Pay Directly via UPI App
-                                </button>
-                            </div>
-                            -->
+
                             <div class="form-group">
                                 <label>आडनाव गट (Surname Category)</label>
                                 <select id="public-donor-surname"
