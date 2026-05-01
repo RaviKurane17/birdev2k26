@@ -300,6 +300,7 @@ const adminApp = {
 
     // --- PENDING ---
     _pendingTab: 'online',
+    _rawPendingData: null,
 
     switchPendingTab(tab) {
         this._pendingTab = tab;
@@ -329,15 +330,33 @@ const adminApp = {
         }
     },
 
-    async loadPending() {
+    async loadPending(forceFetch = false) {
         const onlineContainer = document.getElementById('pending-online-container');
         const cashContainer = document.getElementById('pending-cash-container');
-        onlineContainer.innerHTML = '<div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
-        cashContainer.innerHTML = '';
+        
+        if (forceFetch || !this._rawPendingData) {
+            onlineContainer.innerHTML = '<div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
+            cashContainer.innerHTML = '';
+            try {
+                const donations = await window.api.getDonations();
+                this._rawPendingData = donations.filter(d => !d.isPaid);
+            } catch (err) {
+                onlineContainer.innerHTML = '<p style="color: red;">Failed to load data.</p>';
+                return;
+            }
+        }
 
-        try {
-            const donations = await window.api.getDonations();
-            const pending = donations.filter(d => !d.isPaid);
+        let pending = [...this._rawPendingData];
+
+        // Apply search filter if query exists
+        const searchInput = document.getElementById('pending-search');
+        if (searchInput && searchInput.value.trim() !== '') {
+            const query = searchInput.value.trim().toLowerCase();
+            pending = pending.filter(d => 
+                (d.name && d.name.toLowerCase().includes(query)) || 
+                (d.surnameCategory && d.surnameCategory.toLowerCase().includes(query))
+            );
+        }
 
             // Split: Online = has screenshot OR paymentMode is 'Online'
             const onlinePending = pending.filter(d => d.screenshot_url || d.paymentMode === 'Online');
@@ -425,7 +444,7 @@ const adminApp = {
             });
             // Reload whatever view is active
             if(document.getElementById('view-donations').classList.contains('active')) this.filterDonations();
-            if(document.getElementById('view-pending').classList.contains('active')) this.loadPending();
+            if(document.getElementById('view-pending').classList.contains('active')) this.loadPending(true);
         } catch(err) {
             alert('Error updating: ' + err.message);
         }
@@ -436,7 +455,7 @@ const adminApp = {
         try {
             await window.api.deleteDonation(id);
             if(document.getElementById('view-donations').classList.contains('active')) this.filterDonations();
-            if(document.getElementById('view-pending').classList.contains('active')) this.loadPending();
+            if(document.getElementById('view-pending').classList.contains('active')) this.loadPending(true);
         } catch(err) {
             alert('Error deleting: ' + err.message);
         }
