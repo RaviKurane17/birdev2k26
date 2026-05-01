@@ -689,21 +689,16 @@ const app = {
             }
 
             const upiId = upiIdSetting.value;
-            // Remove spaces from payeeName to ensure maximum compatibility
-            const payeeName = "BirdevJayanti"; 
-            
-            // Clean transaction note (no spaces or special characters, required by some strict banks)
-            const cleanName = name ? name.replace(/[^a-zA-Z0-9]/g, '') : 'Devotee';
-            const transactionNote = `Donation${cleanName}`.substring(0, 40);
+            // Use a simple, short payee name to avoid matching errors
+            const payeeName = "Donation"; 
 
-            // Generate unique transaction reference (required by PhonePe and GPay to prevent duplicate rejections)
-            const trId = 'T' + Date.now() + Math.floor(Math.random() * 1000);
-
-            // Ensure amount is strictly formatted to 2 decimals for UPI compatibility
+            // Format amount safely
             const formattedAmount = parseFloat(amount).toFixed(2);
 
-            // Construct UPI intent link with tr and mc (0000 = general merchant category)
-            const upiLink = `upi://pay?pa=${upiId}&pn=${payeeName}&am=${formattedAmount}&cu=INR&tn=${transactionNote}&tr=${trId}&mc=0000`;
+            // Construct the most minimal UPI intent link possible.
+            // P2P deep-links with tr, mc, and tn are often blocked by GPay/PhonePe anti-spam filters
+            // resulting in fake "Limit Exceeded" errors. Minimal links mimic basic QR scans.
+            const upiLink = `upi://pay?pa=${upiId}&pn=${payeeName}&am=${formattedAmount}&cu=INR`;
 
             // Open link (triggers UPI app selection on mobile)
             window.location.href = upiLink;
