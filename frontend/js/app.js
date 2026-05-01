@@ -677,35 +677,7 @@ const app = {
         } catch (e) { console.error(e); }
     },
 
-    async payViaUPI(amountId, nameId) {
-        const amountInput = document.getElementById(amountId).value;
-        const amount = amountInput ? amountInput.trim() : '';
 
-        if (!amount || isNaN(amount) || amount <= 0) {
-            return alert('कृपया योग्य रक्कम भरा (Please enter a valid amount)');
-        }
-
-        try {
-            const upiIdSetting = await window.api.getSetting('upiId');
-            if (!upiIdSetting || !upiIdSetting.value || upiIdSetting.value === 'Not available') {
-                return alert('UPI ID उपलब्ध नाही. कृपया स्कॅनर वापरा.');
-            }
-
-            const upiId = upiIdSetting.value;
-            const payeeName = "MAHESH LAXMAN HUKKERI";
-
-            const formattedAmount = parseInt(amount, 10);
-
-            const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&tn=Donation&am=${formattedAmount}&cu=INR`;
-
-            console.log("UPI Link Generated:", upiLink);
-
-            window.location.href = upiLink;
-        } catch (err) {
-            console.error(err);
-            alert('Error generating UPI link');
-        }
-    },
 
     previewScreenshot(input) {
         const preview = document.getElementById('screenshot-preview');
