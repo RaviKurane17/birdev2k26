@@ -692,7 +692,7 @@ const app = {
             }
 
             const upiId = upiIdSetting.value;
-            const payeeName = "Mahesh Hukkeri";
+            const payeeName = "MAHESH LAXMAN HUKKERI";
 
             const formattedAmount = parseInt(amount, 10);
 
