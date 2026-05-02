@@ -98,6 +98,8 @@ const adminApp = {
         try {
             const stats = await window.api.getStats();
             document.getElementById('dash-collected').innerText = `₹ ${stats.totalCollected}`;
+            document.getElementById('dash-online').innerText = `₹ ${stats.totalOnline}`;
+            document.getElementById('dash-cash').innerText = `₹ ${stats.totalCash}`;
             document.getElementById('dash-balance').innerText = `₹ ${stats.remainingBalance}`;
             document.getElementById('dash-expenses').innerText = `₹ ${stats.totalExpenses}`;
 
@@ -885,6 +887,8 @@ const adminApp = {
             });
 
             csv += `\n\nTotal Collected,₹ ${stats.totalCollected}\n`;
+            csv += `Online Collection,₹ ${stats.totalOnline}\n`;
+            csv += `Hand-Cash Collection,₹ ${stats.totalCash}\n`;
             csv += `Total Pending,₹ ${stats.totalPending}\n`;
 
             this._downloadCSV('Birdev_Donations_Report.csv', csv);
@@ -960,6 +964,8 @@ const adminApp = {
 
                     <div class="summary-grid">
                         <div class="summary-card"><h3>Total Collected</h3><h2 class="gold">₹ ${stats.totalCollected}</h2></div>
+                        <div class="summary-card"><h3>Online</h3><h2 style="color: #3b82f6;">₹ ${stats.totalOnline}</h2></div>
+                        <div class="summary-card"><h3>Hand-Cash</h3><h2 style="color: #16a34a;">₹ ${stats.totalCash}</h2></div>
                         <div class="summary-card"><h3>Total Expenses</h3><h2 class="red">₹ ${stats.totalExpenses}</h2></div>
                         <div class="summary-card"><h3>Remaining Balance</h3><h2 class="green">₹ ${stats.remainingBalance}</h2></div>
                         <div class="summary-card"><h3>Previous Balance</h3><h2 class="purple">₹ ${previousTotal}</h2></div>
