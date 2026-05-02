@@ -225,6 +225,10 @@ router.get('/stats', async (req, res) => {
         const [pending] = await db.query('SELECT SUM(amount) as totalPending FROM donations WHERE isPaid = false');
         const [expenses] = await db.query('SELECT SUM(amount) as totalExpenses FROM expenses');
         
+        // Split Online vs Handcash
+        const [online] = await db.query("SELECT SUM(amount) as totalOnline FROM donations WHERE isPaid = true AND paymentMode = 'Online'");
+        const [handcash] = await db.query("SELECT SUM(amount) as totalHandcash FROM donations WHERE isPaid = true AND (paymentMode != 'Online' OR paymentMode IS NULL)");
+
         // Include Previous Donations (Magil Shillak) in balance
         let totalPrevious = 0;
         try {
@@ -243,9 +247,13 @@ router.get('/stats', async (req, res) => {
         const totalCollected = baseCollected + totalSpecial;
         const totalPending = parseFloat(pending[0].totalPending) || 0;
         const totalExpenses = parseFloat(expenses[0].totalExpenses) || 0;
+        const totalOnline = parseFloat(online[0].totalOnline) || 0;
+        const totalHandcash = (parseFloat(handcash[0].totalHandcash) || 0) + totalSpecial; // Special donors are usually handcash/offline
 
         res.json({
             totalCollected: totalCollected.toFixed(2),
+            totalOnline: totalOnline.toFixed(2),
+            totalHandcash: totalHandcash.toFixed(2),
             totalPending: totalPending.toFixed(2),
             totalExpenses: totalExpenses.toFixed(2),
             remainingBalance: ((totalCollected + totalPrevious) - totalExpenses).toFixed(2)
