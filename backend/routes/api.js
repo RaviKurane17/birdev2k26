@@ -183,29 +183,6 @@ router.put('/donations/:id', verifyToken, async (req, res) => {
     }
 });
 
-// Download Donations CSV (Admin only)
-router.get('/donations/download-csv', verifyToken, async (req, res) => {
-    try {
-        const [rows] = await db.query('SELECT name, amount, surnameCategory, isPaid, paymentMode, date, eventName FROM donations ORDER BY id DESC');
-        
-        // CSV Header
-        let csv = 'Name,Amount,Surname,Status,Payment Mode,Date,Event\n';
-        
-        // CSV Data
-        rows.forEach(row => {
-            const status = row.isPaid ? 'Paid' : 'Pending';
-            const date = row.date ? new Date(row.date).toLocaleDateString() : '-';
-            csv += `"${row.name}",${row.amount},"${row.surnameCategory}",${status},"${row.paymentMode || 'Cash'}","${date}","${row.eventName}"\n`;
-        });
-
-        res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', 'attachment; filename=donations_report.csv');
-        res.status(200).send(csv);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
 // --- EXPENSE ROUTES ---
 // Get all expenses (public or admin depending on needs, let's make it public for transparency as per request "entire data visible")
 router.get('/expenses', async (req, res) => {
@@ -245,9 +222,6 @@ router.delete('/expenses/:id', verifyToken, async (req, res) => {
 router.get('/stats', async (req, res) => {
     try {
         const [donations] = await db.query('SELECT SUM(amount) as totalCollected FROM donations WHERE isPaid = true');
-        const [onlineDonations] = await db.query("SELECT SUM(amount) as totalOnline FROM donations WHERE isPaid = true AND paymentMode = 'Online'");
-        const [cashDonations] = await db.query("SELECT SUM(amount) as totalCash FROM donations WHERE isPaid = true AND (paymentMode = 'Cash' OR paymentMode IS NULL)");
-        
         const [pending] = await db.query('SELECT SUM(amount) as totalPending FROM donations WHERE isPaid = false');
         const [expenses] = await db.query('SELECT SUM(amount) as totalExpenses FROM expenses');
         
@@ -269,13 +243,9 @@ router.get('/stats', async (req, res) => {
         const totalCollected = baseCollected + totalSpecial;
         const totalPending = parseFloat(pending[0].totalPending) || 0;
         const totalExpenses = parseFloat(expenses[0].totalExpenses) || 0;
-        const totalOnline = parseFloat(onlineDonations[0].totalOnline) || 0;
-        const totalCash = (parseFloat(cashDonations[0].totalCash) || 0) + totalSpecial; // Special donors are usually hand cash/offline
 
         res.json({
             totalCollected: totalCollected.toFixed(2),
-            totalOnline: totalOnline.toFixed(2),
-            totalCash: totalCash.toFixed(2),
             totalPending: totalPending.toFixed(2),
             totalExpenses: totalExpenses.toFixed(2),
             remainingBalance: ((totalCollected + totalPrevious) - totalExpenses).toFixed(2)
