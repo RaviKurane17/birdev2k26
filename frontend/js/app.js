@@ -418,44 +418,18 @@ const app = {
         try {
             const stats = await window.api.getStats();
             document.getElementById('dash-collected').innerText = `₹ ${stats.totalCollected}`;
-            document.getElementById('dash-expenses').innerText = `₹ ${stats.totalExpenses}`;
-            document.getElementById('dash-balance').innerText = `₹ ${stats.remainingBalance}`;
 
             const previous = await window.api.getPreviousDonations();
             const prevTotal = previous.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
             const prevEl = document.getElementById('dash-previous');
             if (prevEl) prevEl.innerText = `₹ ${prevTotal}`;
 
-            document.getElementById('admin-expenses-section').style.display = 'none';
-
-            const expenses = await window.api.getExpenses();
-            const tbody = document.getElementById('expenses-table-body');
-            tbody.innerHTML = expenses.map(e => `
-                <tr>
-                    <td>${new Date(e.date).toLocaleDateString()}</td>
-                    <td>${e.description}</td>
-                    <td>₹ ${e.amount}</td>
-                </tr>
-            `).join('');
         } catch (err) {
             console.error(err);
         }
     },
 
-    async addExpense() {
-        const desc = document.getElementById('new-expense-desc').value;
-        const amount = document.getElementById('new-expense-amount').value;
-        const date = document.getElementById('new-expense-date').value;
 
-        if (!desc || !amount || !date) return alert('Please fill all fields');
-
-        try {
-            await window.api.addExpense({ description: desc, amount, date });
-            this.loadDashboardData(); // reload
-        } catch (err) {
-            alert('Error adding expense: ' + err.message);
-        }
-    },
 
     // --- NEW PUBLIC & ADMIN FEATURES ---
 
@@ -531,15 +505,7 @@ const app = {
         }
     },
 
-    async deleteExpense(id) {
-        if (!confirm('Are you sure you want to delete this expense?')) return;
-        try {
-            await window.api.deleteExpense(id);
-            this.loadDashboardData();
-        } catch (err) {
-            alert('Error deleting: ' + err.message);
-        }
-    },
+
 
     // --- ADMIN SETTINGS FUNCTIONS ---
     async updateNews() {
